@@ -1,4 +1,7 @@
 # 🚀 CareerForge AI
+
+## LIVE DEMO : https://careerforge-ai.streamlit.app/ 
+
 > **Build. Scan. Succeed.** Your All-in-One AI Career Architect.
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
