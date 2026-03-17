@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+langchain-google-genai
+langchain-core
+python-dotenv
+pydantic
+tenacity
+requests
+PyPDF2
+fpdf2
+python-multipart
