@@ -5,8 +5,8 @@ import { Loader2, Upload } from 'lucide-react';
 const API_URL = 'http://localhost:8000';
 
 const ATSScanner = () => {
-  const [jobDescription, setJobDescription] = useState('');
-  const [resumeText, setResumeText] = useState('');
+  const [jobDescription, setJobDescription] = useState(() => sessionStorage.getItem('atsJobDescription') || '');
+  const [resumeText, setResumeText] = useState(() => sessionStorage.getItem('atsResumeText') || sessionStorage.getItem('resume_text') || '');
   const [inputMethod, setInputMethod] = useState('paste');
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
@@ -14,12 +14,9 @@ const ATSScanner = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const savedResume = sessionStorage.getItem('resume_text');
-    if (savedResume) {
-      setResumeText(savedResume);
-      setInputMethod('paste');
-    }
-  }, []);
+    sessionStorage.setItem('atsJobDescription', jobDescription);
+    sessionStorage.setItem('atsResumeText', resumeText);
+  }, [jobDescription, resumeText]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -75,8 +72,8 @@ const ATSScanner = () => {
   };
 
   return (
-    <div className="scanner-page container" style={{ padding: '4rem 0' }}>
-      <header style={{ marginBottom: '3rem' }}>
+    <div className="scanner-page container">
+      <header style={{ marginBottom: '4rem' }}>
         <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📊 ATS Resume Score & Salary Predictor</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', maxWidth: '600px' }}>
           Check if your resume is ready for the real world.
@@ -277,6 +274,7 @@ const ATSScanner = () => {
               grid-template-columns: 1fr;
               gap: 2rem;
            }
+           header h2 { font-size: 2.2rem !important; line-height: 1.2; }
         }
         .input-group label {
           display: block;

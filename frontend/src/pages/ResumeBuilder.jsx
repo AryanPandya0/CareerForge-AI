@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Download, Loader2 } from 'lucide-react';
 import { saveAs } from 'file-saver';
@@ -6,22 +6,37 @@ import { saveAs } from 'file-saver';
 const API_URL = 'http://localhost:8000';
 
 const ResumeBuilder = () => {
-  const [formData, setFormData] = useState({
-    profile_name: '',
-    email: '',
-    phone: '',
-    github: '',
-    summary: '',
-    skills: '',
-    projects: '',
-    experience: '',
-    education: '',
-    other_info: '',
-    achievements: '',
-    job_desc: '',
-    template_choice: 'Modern (Bold Header)',
-    theme_color: '#1A237E'
+  const [formData, setFormData] = useState(() => {
+    const saved = sessionStorage.getItem('resumeBuilderFormData');
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try { 
+        const parsed = JSON.parse(saved); 
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) { console.error('Error parsing session data', e); }
+    }
+    return {
+      profile_name: '',
+      email: '',
+      phone: '',
+      github: '',
+      summary: '',
+      skills: '',
+      projects: '',
+      experience: '',
+      education: '',
+      other_info: '',
+      achievements: '',
+      job_desc: '',
+      template_choice: 'Modern (Bold Header)',
+      theme_color: '#1A237E'
+    };
   });
+
+  useEffect(() => {
+    sessionStorage.setItem('resumeBuilderFormData', JSON.stringify(formData));
+  }, [formData]);
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -64,7 +79,7 @@ const ResumeBuilder = () => {
       setError('❌ PDF data is missing. Please generate the resume again.');
       return;
     }
-    
+
     console.log("Base64 Length:", result.pdf_base64.length);
     console.log("Base64 Preview:", result.pdf_base64.substring(0, 50));
 
@@ -76,11 +91,11 @@ const ResumeBuilder = () => {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      
+
       // Create a Blob
       const blob = new Blob([byteArray], { type: 'application/pdf' });
       const filename = `${formData.profile_name ? formData.profile_name.replace(/\s+/g, '_') : 'My'}_Resume.pdf`;
-      
+
       console.log("Attempting saveAs with filename:", filename);
       // Attempt 1: FileSaver
       try {
@@ -99,7 +114,7 @@ const ResumeBuilder = () => {
         URL.revokeObjectURL(url);
         console.log("Fallback anchor triggered");
       }
-      
+
     } catch (err) {
       console.error('Failed to decode/download PDF:', err);
       setError('❌ Failed to construct the PDF file. Please try generating it again.');
@@ -107,7 +122,7 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="builder-page container" style={{ padding: '4rem 0' }}>
+    <div className="builder-page container">
       <header style={{ marginBottom: '4rem' }}>
         <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>📝 Resume Builder</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', maxWidth: '600px' }}>
@@ -127,19 +142,19 @@ const ResumeBuilder = () => {
           <div className="form-grid-3">
             <div className="input-group">
               <label>Full Name *</label>
-              <input name="profile_name" value={formData.profile_name} onChange={handleChange} placeholder="e.g. John Doe" required />
+              <input name="profile_name" value={formData.profile_name} onChange={handleChange} placeholder="Aryan Pandya" required />
               <label style={{ marginTop: '1rem' }}>Email</label>
-              <input name="email" value={formData.email} onChange={handleChange} placeholder="john@example.com" />
+              <input name="email" value={formData.email} onChange={handleChange} placeholder="dev@gmail.com" />
             </div>
             <div className="input-group">
               <label>Phone</label>
               <input name="phone" value={formData.phone} onChange={handleChange} placeholder="+91 98765 43210" />
               <label style={{ marginTop: '1rem' }}>LinkedIn / GitHub URL</label>
-              <input name="github" value={formData.github} onChange={handleChange} placeholder="https://..." />
+              <input name="github" value={formData.github} onChange={handleChange} placeholder="https://github.com/username" />
             </div>
             <div className="input-group">
               <label>Education</label>
-              <textarea name="education" value={formData.education} onChange={handleChange} placeholder={"B.Tech Computer Science, GTU (2021-2025)\nCGPA: 8.5/10"} style={{ height: '115px' }} />
+              <textarea name="education" value={formData.education} onChange={handleChange} placeholder={"B.Tech Computer Science, CVMU (2023-2027)\nCGPA: 8.5/10"} style={{ height: '115px' }} />
             </div>
           </div>
         </div>
@@ -230,7 +245,7 @@ const ResumeBuilder = () => {
       {result && (
         <div style={{ marginTop: '3rem' }}>
           <div style={{ padding: '1rem 1.5rem', background: 'rgba(40, 167, 69, 0.1)', border: '1px solid #28a745', marginBottom: '1rem', color: 'var(--text-primary)', borderRadius: '4px' }}>
-            <span style={{color: '#28a745'}}>✅</span> Resume Generated Successfully!
+            <span style={{ color: '#28a745' }}>✅</span> Resume Generated Successfully!
           </div>
           <div style={{ padding: '1rem 1.5rem', background: 'rgba(0, 123, 255, 0.1)', border: '1px solid #007bff', marginBottom: '2rem', color: 'var(--text-primary)', borderRadius: '4px' }}>
             👉 <strong>Next Step:</strong> Go to the 'Scanner' page to see how well this resume scores!
@@ -306,7 +321,7 @@ const ResumeBuilder = () => {
         @media (max-width: 768px) {
            .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; gap: 1rem; }
            .design-grid { flex-direction: column; align-items: flex-start; gap: 1rem; }
-           header h2 { font-size: 2.5rem !important; }
+           header h2 { font-size: 2.2rem !important; line-height: 1.2; }
         }
         
         .input-group {

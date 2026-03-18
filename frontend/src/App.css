@@ -1,16 +1,23 @@
 .app-container {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
-/* TOP NAVIGATION (Desktop) */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP NAVIGATION (Desktop & Mobile Minimal) */
 .nav {
   position: sticky;
   top: 0;
   z-index: 100;
   padding: 1.5rem 0;
   transition: all 0.3s ease;
+  background: var(--bg-color); /* ensures it doesn't overlap text awkwardly without glass */
 }
 
 .nav.scrolled {
@@ -61,6 +68,7 @@
   justify-content: center;
   padding: 0.5rem;
   border-radius: 50%;
+  cursor: pointer;
 }
 .theme-toggle-btn:hover {
   background: var(--glass-bg);
@@ -106,6 +114,7 @@
 .hero {
   padding: 8rem 0 4rem;
   text-align: center;
+  flex-grow: 1;
 }
 
 .hero h1 {
@@ -133,10 +142,10 @@
 
 .btn-primary {
   background: var(--primary-color);
-  color: #fff; /* Ensure text is always readable on primary button */
+  color: #fff !important; 
   padding: 1.2rem 2.8rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -146,16 +155,17 @@
 }
 
 .btn-primary:hover {
-  background: var(--text-primary); /* Swap for contrast on hover */
+  background: var(--text-primary) !important;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .btn-secondary {
   background: transparent;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
   padding: 1.2rem 2.8rem;
   border: 1px solid var(--text-primary);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -165,18 +175,11 @@
 }
 
 .btn-secondary:hover {
-  background: var(--text-primary);
-  color: var(--bg-color);
+  background: var(--text-primary) !important;
+  color: var(--bg-color) !important;
 }
 
-/* SECTION GRID */
-.section-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3rem;
-  margin-top: 4rem;
-}
-
+/* CARDS */
 .card {
   padding: 3rem;
   border-radius: 8px;
@@ -188,19 +191,33 @@
 .card:hover {
   transform: translateY(-5px);
   border-color: var(--primary-color);
-  box-shadow: 0 10px 30px rgba(36, 88, 60, 0.1); /* Subtle green shadow */
+  box-shadow: 0 10px 30px rgba(36, 88, 60, 0.1);
 }
 
-.card h3 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
+/* SECTION GRID (Restored) */
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin-top: 4rem;
 }
 
-.card p {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-  font-weight: 300;
+/* COOL MODERN INPUTS */
+input:not([type="color"]):not([type="file"]), textarea, select {
+  font-family: var(--font-ui) !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+input:not([type="color"]):not([type="file"]):focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(36, 88, 60, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+[data-theme='dark'] input:focus, [data-theme='dark'] textarea:focus, [data-theme='dark'] select:focus {
+  box-shadow: 0 0 0 3px rgba(62, 122, 90, 0.3) !important;
 }
 
 /* FOOTER */
@@ -213,6 +230,20 @@
   font-size: 0.9rem;
 }
 
+/* GLOBAL LAYOUT LOCKS FOR CHAT */
+.coach-active {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.builder-page, .scanner-page {
+  padding: 4rem 1.5rem;
+}
+
+.mobile-nav-spacer { display: none; }
+.mobile-back-btn { display: none !important; }
+
 /* RESPONSIVE DESIGN */
 @media (max-width: 900px) {
   .hero h1 { font-size: 3.5rem; }
@@ -220,20 +251,35 @@
 }
 
 @media (max-width: 768px) {
-  /* Hide desktop links and show mobile bottom nav */
+  /* Only hide Links. Theme Button & Logo stay in Top Nav. */
   .nav-links { display: none; }
   .bottom-nav { display: block; }
+  .nav { padding: 1rem 0; }
   
   .hero { padding: 4rem 0 2rem; }
-  .hero h1 { font-size: 2.5rem; }
-  .hero p { font-size: 1.1rem; }
-  .hero-btns { flex-direction: column; width: 100%; padding: 0 1rem; }
+  .hero h1 { font-size: 2.2rem; }
+  .hero p { font-size: 1rem; }
+  .hero-btns { flex-direction: column; width: 100%; padding: 0; }
   .btn-primary, .btn-secondary { width: 100%; padding: 1rem; }
   
-  .section-grid { grid-template-columns: 1fr; }
+  .section-grid { grid-template-columns: 1fr; margin-top: 2rem; gap: 1.5rem; }
+  .card { padding: 2rem; }
+
+  /* Process grid centered on mobile */
+  .process-grid > div { text-align: center; display: flex; flex-direction: column; align-items: center; }
   
-  /* Add padding bottom to main content so bottom nav doesn't cover it */
-  .main-content { padding-bottom: 80px; }
+  .builder-page, .scanner-page { padding: 2rem 1.5rem !important; }
+  .footer { padding: 2rem 1.5rem 90px 1.5rem; } /* Pushes above fixed nav */
   
-  .container { padding: 0 1rem; }
+  /* Prevent content hiding under bottom nav */
+  .main-content { padding-bottom: 76px; }
+  
+  /* Chat visually behaves like a completely separate full-screen native app on mobile */
+  .coach-active .nav { display: none !important; }
+  .coach-active .bottom-nav { display: none !important; }
+  .coach-active .mobile-nav-spacer { display: none !important; }
+  .mobile-back-btn { display: flex !important; }
+  .coach-main { padding-bottom: 0 !important; } 
+  
+  .container { padding: 0 1.2rem; }
 }

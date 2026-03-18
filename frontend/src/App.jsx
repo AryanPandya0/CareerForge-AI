@@ -37,6 +37,14 @@ export const ThemeProvider = ({ children }) => {
 
 export const useTheme = () => useContext(ThemeContext);
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 const Layout = ({ children }) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -50,34 +58,35 @@ const Layout = ({ children }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Determine if we are on the coach page to apply specific layout rules
   const isCoachPage = location.pathname === '/coach';
+  const isHomePage = location.pathname === '/';
 
   return (
     <div className={`app-container ${isCoachPage ? 'coach-active' : ''}`}>
-      {/* Top Navigation (Desktop) - Hide on coach page for a more immersive experience on mobile if desired, or keep it. */}
-      {(!isCoachPage || window.innerWidth > 768) && (
-        <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
-          <div className="container nav-content">
-            <Link to="/" className="logo">CAREERFORGE</Link>
-            <div className="nav-links">
-              <Link to="/builder" className={`nav-link ${location.pathname === '/builder' ? 'active' : ''}`}>Builder</Link>
-              <Link to="/scanner" className={`nav-link ${location.pathname === '/scanner' ? 'active' : ''}`}>Scanner</Link>
-              <Link to="/coach" className={`nav-link ${location.pathname === '/coach' ? 'active' : ''}`}>Coach</Link>
-              <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle Theme">
-                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-              </button>
-            </div>
+      <ScrollToTop />
+      
+      {/* Top Navigation - Always visible on desktop, reduced to logo/theme toggle on mobile */}
+      <nav className={`nav ${scrolled ? 'scrolled' : ''} ${isCoachPage ? 'nav-coach' : ''}`}>
+        <div className="container nav-content">
+          <Link to="/" className="logo hide-on-mobile">CAREERFORGE</Link>
+          <div className="nav-links">
+            <Link to="/builder" className={`nav-link ${location.pathname === '/builder' ? 'active' : ''}`}>Builder</Link>
+            <Link to="/scanner" className={`nav-link ${location.pathname === '/scanner' ? 'active' : ''}`}>Scanner</Link>
+            <Link to="/coach" className={`nav-link ${location.pathname === '/coach' ? 'active' : ''}`}>Coach</Link>
           </div>
-        </nav>
-      )}
+          {/* Theme button moved to absolute right on mobile natively via css flex or absolute pos in App.css */}
+          <button className="theme-toggle-btn top-right-btn" onClick={toggleTheme} aria-label="Toggle Theme">
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+        </div>
+      </nav>
       
       <main className={`main-content ${isCoachPage ? 'coach-main' : ''}`}>
         {children}
       </main>
 
-      {/* Hide footer on coach page to maximize chat space */}
-      {!isCoachPage && (
+      {/* Footer only on Home Page */}
+      {isHomePage && (
         <footer className="footer">
           <div className="container">
             <p>© 2025 CAREERFORGE AI. HANDCRAFTED FOR YOUR CAREER.</p>
@@ -104,10 +113,6 @@ const Layout = ({ children }) => {
             <Bot size={24} />
             <span>Coach</span>
           </Link>
-          <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle Theme" style={{ padding: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-secondary)', gap: '0.25rem' }}>
-            {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
-            <span style={{ fontSize: '0.75rem', fontWeight: 500, fontFamily: 'var(--font-ui)' }}>Theme</span>
-          </button>
         </div>
       </nav>
     </div>

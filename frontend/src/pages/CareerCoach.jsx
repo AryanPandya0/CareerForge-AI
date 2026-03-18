@@ -1,23 +1,38 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
-import { Send, Loader2 } from 'lucide-react';
-// Do not import useTheme as it's not strictly necessary for component function but good if we needed state
+import { Send, Loader2, Bot, ArrowLeft } from 'lucide-react';
 
 const API_URL = 'http://localhost:8000';
 
 const CareerCoach = () => {
-  const [messages, setMessages] = useState([
-    { role: 'ai', content: "Hey! 👋 I'm **CareerForge AI**, your personal career coach.\n\nI can help you with:\n- 🎤 **Interview Prep** (Mock questions, STAR method)\n- 💻 **Tech Concepts** (Python, AI, DSA explained simply)\n- 🗺️ **Career Roadmaps** for students & professionals\n\nWhat would you like to work on today?" }
-  ]);
+  const navigate = useNavigate();
+  const [messages, setMessages] = useState(() => {
+    const saved = sessionStorage.getItem('careerCoachMessages');
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      try { 
+        const parsed = JSON.parse(saved); 
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch(e){}
+    }
+    return [
+      { role: 'ai', content: "Hey! 👋 I'm **CareerForge AI**, your personal career coach.\n\nI can help you with:\n- 🎤 **Interview Prep** (Mock questions, STAR method)\n- 💻 **Tech Concepts** (Python, AI, DSA explained simply)\n- 🗺️ **Career Roadmaps** for students & professionals\n\nWhat would you like to work on today?" }
+    ];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [streamingText, setStreamingText] = useState('');
-  const scrollRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    sessionStorage.setItem('careerCoachMessages', JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages, streamingText]);
 
   const handleSend = async (e) => {
@@ -101,11 +116,12 @@ const CareerCoach = () => {
       flexDirection: 'column',
       padding: 0,
       flexGrow: 1,
-      minHeight: 'calc(100dvh - 140px)' // desktop fallback
+      height: '100%',
+      overflow: 'hidden'
     }}>
       {/* Compact header */}
       <div style={{ 
-        padding: '1.2rem 1.5rem', 
+        padding: '1rem 1.2rem', 
         borderBottom: '1px solid var(--border-color)',
         background: 'var(--card-bg)',
         flexShrink: 0,
@@ -114,6 +130,24 @@ const CareerCoach = () => {
         gap: '0.8rem',
         zIndex: 10
       }}>
+        <button 
+          onClick={() => navigate(-1)} 
+          className="mobile-back-btn"
+          style={{ 
+            background: 'transparent', 
+            border: 'none', 
+            color: 'var(--text-primary)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            padding: '0.5rem',
+            marginLeft: '-0.5rem',
+            cursor: 'pointer'
+          }}
+          aria-label="Go back"
+        >
+          <ArrowLeft size={24} />
+        </button>
         <div style={{
           width: '40px', height: '40px', borderRadius: '50%',
           background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -131,7 +165,6 @@ const CareerCoach = () => {
 
       {/* Chat messages */}
       <div 
-        ref={scrollRef} 
         style={{ 
           flexGrow: 1, 
           overflowY: 'auto', 
@@ -202,6 +235,7 @@ const CareerCoach = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input area */}
@@ -213,8 +247,6 @@ const CareerCoach = () => {
         gap: '0.8rem',
         alignItems: 'center',
         flexShrink: 0,
-        position: 'sticky',
-        bottom: 0,
         zIndex: 10
       }}>
         <input 
@@ -250,17 +282,13 @@ const CareerCoach = () => {
           <Send size={20} />
         </button>
       </form>
+      
+      <div className="mobile-nav-spacer"></div>
 
       <style>{`
         /* Global override for coach page body */
         body {
           overscroll-behavior-y: contain;
-        }
-        
-        @media (max-width: 768px) {
-           .coach-page {
-               height: calc(100dvh - 66px) !important; /* bottom nav height applied */
-           }
         }
 
         .markdown-content {
