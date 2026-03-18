@@ -115,8 +115,20 @@ def generate_pdf_resume(ai_data, contact_info, template_choice, brand_color):
         pdf.section_title("Additional Details")
         pdf.section_body(ai_data['other_information'])
 
-    # Output as bytes - fpdf2 returns bytes by default with no dest arg
-    pdf_output = pdf.output(dest='S')
-    if isinstance(pdf_output, str):
-        return pdf_output.encode('latin-1')
-    return bytes(pdf_output)
+    # Legacy fpdf will silently write to stdout and return '' if no args are passed.
+    # Therefore, we MUST try dest='S' first to force it to return the string buffer.
+    try:
+        pdf_data = pdf.output(dest='S')
+        if isinstance(pdf_data, bytearray):
+            return bytes(pdf_data)
+        if isinstance(pdf_data, str):
+            return pdf_data.encode('latin-1')
+        return bytes(pdf_data)
+    except Exception:
+        # Modern fpdf2 throws an error on dest='S', so we fall back to default output()
+        pdf_bytes = pdf.output()
+        if isinstance(pdf_bytes, bytearray):
+            return bytes(pdf_bytes)
+        if isinstance(pdf_bytes, str):
+            return pdf_bytes.encode('latin-1')
+        return bytes(pdf_bytes)
