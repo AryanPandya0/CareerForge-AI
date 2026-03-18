@@ -109,14 +109,14 @@ const ResumeBuilder = () => {
   return (
     <div className="builder-page container" style={{ padding: '4rem 0' }}>
       <header style={{ marginBottom: '4rem' }}>
-        <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📝 Resume Builder</h2>
+        <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>📝 Resume Builder</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', maxWidth: '600px' }}>
           Transform your rough notes into a <strong>High-Impact PDF</strong>.
         </p>
       </header>
 
       {error && (
-        <div style={{ padding: '1rem 1.5rem', background: '#fff3cd', border: '1px solid #ffc107', marginBottom: '2rem', color: '#856404' }}>
+        <div style={{ padding: '1rem 1.5rem', background: 'rgba(255, 193, 7, 0.1)', border: '1px solid #ffc107', marginBottom: '2rem', color: 'var(--text-primary)', borderRadius: '4px' }}>
           {error}
         </div>
       )}
@@ -124,7 +124,7 @@ const ResumeBuilder = () => {
       <form onSubmit={handleSubmit} className="editorial-form">
         <div className="form-section">
           <h3>1. Profile Details</h3>
-          <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+          <div className="form-grid-3">
             <div className="input-group">
               <label>Full Name *</label>
               <input name="profile_name" value={formData.profile_name} onChange={handleChange} placeholder="e.g. John Doe" required />
@@ -158,7 +158,7 @@ const ResumeBuilder = () => {
 
         <div className="form-section">
           <h3>3. Experience & Skills</h3>
-          <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+          <div className="form-grid-2">
             <div>
               <div className="input-group">
                 <label>Summary (Rough Draft)</label>
@@ -194,27 +194,27 @@ const ResumeBuilder = () => {
 
         <div className="form-section">
           <h3>🎨 Design Studio</h3>
-          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <div className="design-grid">
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label>Template</label>
-              <select name="template_choice" value={formData.template_choice} onChange={handleChange} style={{ padding: '0.8rem', border: '1px solid #e0e0e0', background: '#fafafa', fontFamily: 'var(--font-ui)', fontSize: '0.9rem' }}>
+              <select name="template_choice" value={formData.template_choice} onChange={handleChange} style={{ padding: '0.8rem', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-primary)', fontFamily: 'var(--font-ui)', fontSize: '0.9rem', borderRadius: '4px' }}>
                 <option value="Modern (Bold Header)">Modern (Bold Header)</option>
                 <option value="Classic (Minimal)">Classic (Minimal)</option>
               </select>
             </div>
             <div className="input-group" style={{ marginBottom: 0 }}>
               <label>Accent Color</label>
-              <input type="color" name="theme_color" value={formData.theme_color} onChange={handleChange} style={{ width: '60px', height: '40px', padding: '2px', border: '1px solid #e0e0e0', cursor: 'pointer' }} />
+              <input type="color" name="theme_color" value={formData.theme_color} onChange={handleChange} style={{ width: '60px', height: '40px', padding: '2px', border: '1px solid var(--border-color)', cursor: 'pointer', background: 'var(--card-bg)', borderRadius: '4px' }} />
             </div>
           </div>
-          <p style={{ marginTop: '1rem', color: '#888', fontSize: '0.85rem' }}>
+          <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
             💡 <strong>Pro Tip:</strong> Use 'Classic' for Finance/Law roles and 'Modern' for Tech/Creative roles.
           </p>
         </div>
 
         <div className="editorial-divider"></div>
 
-        <div className="form-actions" style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div className="form-actions" style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
           <button type="submit" className="btn-primary" disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {loading ? <><Loader2 size={18} className="animate-spin" /> AI is drafting... (takes ~10s)</> : '🚀 Generate Professional Resume'}
           </button>
@@ -229,34 +229,34 @@ const ResumeBuilder = () => {
 
       {result && (
         <div style={{ marginTop: '3rem' }}>
-          <div style={{ padding: '1rem 1.5rem', background: '#d4edda', border: '1px solid #c3e6cb', marginBottom: '1rem', color: '#155724' }}>
-            ✅ Resume Generated Successfully!
+          <div style={{ padding: '1rem 1.5rem', background: 'rgba(40, 167, 69, 0.1)', border: '1px solid #28a745', marginBottom: '1rem', color: 'var(--text-primary)', borderRadius: '4px' }}>
+            <span style={{color: '#28a745'}}>✅</span> Resume Generated Successfully!
           </div>
-          <div style={{ padding: '1rem 1.5rem', background: '#cce5ff', border: '1px solid #b8daff', marginBottom: '2rem', color: '#004085' }}>
+          <div style={{ padding: '1rem 1.5rem', background: 'rgba(0, 123, 255, 0.1)', border: '1px solid #007bff', marginBottom: '2rem', color: 'var(--text-primary)', borderRadius: '4px' }}>
             👉 <strong>Next Step:</strong> Go to the 'Scanner' page to see how well this resume scores!
           </div>
 
           <div className="preview-section glass" style={{ padding: '3rem' }}>
-            <h3 style={{ marginBottom: '2rem' }}>AI Generated Data</h3>
+            <h3 style={{ marginBottom: '2rem', color: 'var(--text-primary)' }}>AI Generated Data</h3>
             <div>
-              <p style={{ fontStyle: 'italic', fontSize: '1.1rem', color: '#333', marginBottom: '2rem' }}>
+              <p style={{ fontStyle: 'italic', fontSize: '1.1rem', color: 'var(--text-primary)', marginBottom: '2rem' }}>
                 "{result.ai_data.summary}"
               </p>
               <div className="editorial-divider" style={{ opacity: 0.3 }}></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+              <div className="preview-grid">
                 <div>
-                  <h4 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', marginBottom: '1.5rem', color: '#888' }}>SKILLS</h4>
+                  <h4 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>SKILLS</h4>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                     {result.ai_data.skills.map((s, i) => (
-                      <span key={i} style={{ border: '1px solid #ddd', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>{s}</span>
+                      <span key={i} style={{ border: '1px solid var(--border-color)', padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: 'var(--text-primary)', borderRadius: '4px', background: 'var(--card-bg)' }}>{s}</span>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', marginBottom: '1.5rem', color: '#888' }}>PROJECTS</h4>
+                  <h4 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>PROJECTS</h4>
                   <ul style={{ listStyle: 'none', padding: 0 }}>
                     {result.ai_data.projects.slice(0, 3).map((p, i) => (
-                      <li key={i} style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#555' }}>• {p}</li>
+                      <li key={i} style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>• {p}</li>
                     ))}
                   </ul>
                 </div>
@@ -273,7 +273,42 @@ const ResumeBuilder = () => {
         .form-section h3 {
           font-size: 1.8rem;
           margin-bottom: 2rem;
+          color: var(--text-primary);
         }
+        
+        /* CSS Grids for responsiveness */
+        .form-grid-3 {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+        }
+        .form-grid-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+        }
+        .design-grid {
+          display: flex;
+          gap: 2rem;
+          align-items: center;
+        }
+        .preview-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3rem;
+        }
+        
+        @media (max-width: 900px) {
+           .form-grid-3 { grid-template-columns: 1fr 1fr; }
+           .preview-grid { grid-template-columns: 1fr; gap: 2rem; }
+        }
+        
+        @media (max-width: 768px) {
+           .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+           .design-grid { flex-direction: column; align-items: flex-start; gap: 1rem; }
+           header h2 { font-size: 2.5rem !important; }
+        }
+        
         .input-group {
           margin-bottom: 1.5rem;
         }
@@ -283,25 +318,26 @@ const ResumeBuilder = () => {
           text-transform: uppercase;
           letter-spacing: 0.1em;
           margin-bottom: 0.5rem;
-          color: #888;
+          color: var(--text-secondary);
         }
         .input-group input,
         .input-group textarea,
         .input-group select {
           width: 100%;
           padding: 1rem;
-          border: 1px solid #e0e0e0;
-          background: #fafafa;
+          border: 1px solid var(--border-color);
+          background: var(--card-bg);
+          color: var(--text-primary);
           font-family: var(--font-ui);
           font-size: 1rem;
           transition: border-color 0.2s ease;
-          border-radius: 2px;
+          border-radius: 4px;
         }
         .input-group input:focus,
         .input-group textarea:focus {
           outline: none;
-          border-color: var(--text-primary);
-          background: white;
+          border-color: var(--primary-color);
+          background: var(--bg-color);
         }
         .animate-spin {
           animation: spin 1s linear infinite;

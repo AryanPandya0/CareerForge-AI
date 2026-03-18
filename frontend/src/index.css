@@ -1,15 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-  --bg-color: #fdfdfc;
-  --text-primary: #1a1a1a;
-  --text-secondary: #555555;
-  --accent-color: #1a237e;
-  --glass-bg: rgba(255, 255, 255, 0.4);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  --bg-color: #F5F5F5;
+  --text-primary: #111111;
+  --text-secondary: #444444;
+  --primary-color: #24583C;
+  --accent-yellow: #F5E74E;
+  --accent-purple: #B6B7F4;
+  --card-bg: #FFFFFF;
+  --border-color: #E0E0E0;
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
   --font-editorial: 'Playfair Display', serif;
   --font-ui: 'Inter', sans-serif;
+  
+  --nav-bg: rgba(245, 245, 245, 0.8);
+}
+
+[data-theme='dark'] {
+  --bg-color: #121212;
+  --text-primary: #F5F5F5;
+  --text-secondary: #A0A0A0;
+  --primary-color: #3E7A5A;
+  --accent-yellow: #D4C73E;
+  --accent-purple: #9A9BE0;
+  --card-bg: #1E1E1E;
+  --border-color: #333333;
+
+  --glass-bg: rgba(30, 30, 30, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  
+  --nav-bg: rgba(18, 18, 18, 0.8);
 }
 
 * {
@@ -24,6 +48,7 @@ body {
   font-family: var(--font-ui);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3 {
@@ -58,7 +83,7 @@ a:hover {
 
 .editorial-divider {
   height: 1px;
-  background: #e0e0e0;
+  background: var(--border-color);
   margin: 2rem 0;
 }
 

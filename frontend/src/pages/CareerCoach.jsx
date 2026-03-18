@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Send, Loader2 } from 'lucide-react';
+// Do not import useTheme as it's not strictly necessary for component function but good if we needed state
 
 const API_URL = 'http://localhost:8000';
 
@@ -61,18 +62,16 @@ const CareerCoach = () => {
                 setStreamingText(fullText);
               }
               if (data.done) {
-                // Streaming complete — add the final message
                 setMessages(prev => [...prev, { role: 'ai', content: fullText }]);
                 setStreamingText('');
               }
             } catch (parseErr) {
-              // skip malformed JSON chunks
+              // skip
             }
           }
         }
       }
 
-      // Fallback: if stream ended without a done signal
       if (fullText && streamingText) {
         setMessages(prev => [...prev, { role: 'ai', content: fullText }]);
         setStreamingText('');
@@ -80,7 +79,6 @@ const CareerCoach = () => {
 
     } catch (err) {
       console.error('Streaming error, falling back to regular endpoint:', err);
-      // Fallback to non-streaming endpoint
       try {
         const response = await fetch(`${API_URL}/chat/query`, {
           method: 'POST',
@@ -99,54 +97,69 @@ const CareerCoach = () => {
 
   return (
     <div className="coach-page" style={{ 
-      height: 'calc(100vh - 228px)', 
       display: 'flex', 
       flexDirection: 'column',
-      padding: 0 
+      padding: 0,
+      flexGrow: 1,
+      minHeight: 'calc(100dvh - 140px)' // desktop fallback
     }}>
       {/* Compact header */}
       <div style={{ 
-        padding: '1.5rem 2rem', 
-        borderBottom: '1px solid #eee',
-        background: '#fff',
-        flexShrink: 0
+        padding: '1.2rem 1.5rem', 
+        borderBottom: '1px solid var(--border-color)',
+        background: 'var(--card-bg)',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.8rem',
+        zIndex: 10
       }}>
-        <h2 style={{ fontSize: '1.6rem', margin: 0, fontFamily: 'var(--font-editorial)' }}>
-          🤖 AI Career Coach
-        </h2>
+        <div style={{
+          width: '40px', height: '40px', borderRadius: '50%',
+          background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontSize: '1.2rem'
+        }}>
+          🤖
+        </div>
+        <div>
+          <h2 style={{ fontSize: '1.2rem', margin: 0, fontFamily: 'var(--font-ui)', fontWeight: 600, color: 'var(--text-primary)' }}>
+            CareerForge AI
+          </h2>
+          <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 500 }}>● Online Coach</span>
+        </div>
       </div>
 
-      {/* Chat messages — takes all available space */}
+      {/* Chat messages */}
       <div 
         ref={scrollRef} 
         style={{ 
           flexGrow: 1, 
           overflowY: 'auto', 
-          padding: '1.5rem 2rem',
-          background: '#fafafa'
+          padding: '1.5rem',
+          background: 'var(--bg-color)'
         }}
       >
         {messages.map((msg, i) => (
           <div key={i} style={{ 
             display: 'flex', 
             justifyContent: msg.role === 'human' ? 'flex-end' : 'flex-start', 
-            marginBottom: '1.2rem' 
+            marginBottom: '1rem' 
           }}>
             <div style={{ 
-              maxWidth: '75%', 
-              padding: '1rem 1.4rem',
-              background: msg.role === 'human' ? '#1a1a1a' : '#fff',
-              color: msg.role === 'human' ? '#fff' : '#333',
+              maxWidth: '85%', 
+              padding: '0.8rem 1.2rem',
+              background: msg.role === 'human' ? 'var(--primary-color)' : 'var(--card-bg)',
+              color: msg.role === 'human' ? '#fff' : 'var(--text-primary)',
               borderRadius: msg.role === 'human' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-              boxShadow: msg.role === 'ai' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
-              border: msg.role === 'ai' ? '1px solid #eee' : 'none'
+              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+              border: msg.role === 'ai' ? '1px solid var(--border-color)' : 'none'
             }}>
               {msg.role === 'ai' ? (
                 <div className="markdown-content">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               ) : (
-                <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
                   {msg.content}
                 </p>
               )}
@@ -154,17 +167,16 @@ const CareerCoach = () => {
           </div>
         ))}
 
-        {/* Streaming text (typing effect) */}
         {streamingText && (
-          <div style={{ display: 'flex', marginBottom: '1.2rem' }}>
+          <div style={{ display: 'flex', marginBottom: '1rem' }}>
             <div style={{ 
-              maxWidth: '75%', 
-              padding: '1rem 1.4rem',
-              background: '#fff',
-              color: '#333',
+              maxWidth: '85%', 
+              padding: '0.8rem 1.2rem',
+              background: 'var(--card-bg)',
+              color: 'var(--text-primary)',
               borderRadius: '18px 18px 18px 4px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-              border: '1px solid #eee'
+              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+              border: '1px solid var(--border-color)'
             }}>
               <div className="markdown-content">
                 <ReactMarkdown>{streamingText}</ReactMarkdown>
@@ -174,67 +186,87 @@ const CareerCoach = () => {
           </div>
         )}
 
-        {/* Loading indicator (before streaming starts) */}
         {loading && !streamingText && (
           <div style={{ display: 'flex', marginBottom: '1rem' }}>
             <div style={{ 
               padding: '1rem 1.4rem', 
-              background: '#fff', 
+              background: 'var(--card-bg)', 
               borderRadius: '18px 18px 18px 4px',
-              border: '1px solid #eee'
+              border: '1px solid var(--border-color)'
             }}>
               <div className="typing-dots">
-                <span></span><span></span><span></span>
+                <span style={{background: 'var(--primary-color)'}}></span>
+                <span style={{background: 'var(--primary-color)'}}></span>
+                <span style={{background: 'var(--primary-color)'}}></span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Input area — fixed at bottom */}
+      {/* Input area */}
       <form onSubmit={handleSend} style={{ 
-        padding: '1rem 2rem', 
-        background: '#fff', 
-        borderTop: '1px solid #eee', 
+        padding: '1rem', 
+        background: 'var(--card-bg)', 
+        borderTop: '1px solid var(--border-color)', 
         display: 'flex', 
-        gap: '1rem',
+        gap: '0.8rem',
         alignItems: 'center',
-        flexShrink: 0
+        flexShrink: 0,
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 10
       }}>
         <input 
           value={input} 
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about interviews, tech concepts, career roadmaps..." 
+          placeholder="Ask about interviews..." 
           style={{ 
-            flexGrow: 1, background: '#f5f5f5', border: '1px solid #e5e5e5', 
-            fontSize: '1rem', padding: '0.9rem 1.2rem', borderRadius: '24px',
+            flexGrow: 1, background: 'var(--bg-color)', border: '1px solid var(--border-color)', 
+            color: 'var(--text-primary)',
+            fontSize: '1rem', padding: '0.8rem 1.2rem', borderRadius: '24px',
             outline: 'none', fontFamily: 'var(--font-ui)',
-            transition: 'border-color 0.2s'
+            transition: 'border-color 0.2s',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#999'}
-          onBlur={(e) => e.target.style.borderColor = '#e5e5e5'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--primary-color)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
         />
         <button 
           type="submit" 
           disabled={!input.trim() || loading} 
           style={{ 
-            background: input.trim() ? '#1a1a1a' : '#e5e5e5', 
-            border: 'none', cursor: input.trim() ? 'pointer' : 'default', 
+            background: input.trim() ? 'var(--primary-color)' : 'var(--bg-color)', 
+            border: input.trim() ? 'none' : '1px solid var(--border-color)',
+            cursor: input.trim() ? 'pointer' : 'default', 
             padding: '0.8rem',
             borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background 0.2s',
-            width: '44px', height: '44px'
+            transition: 'all 0.2s',
+            width: '46px', height: '46px',
+            color: input.trim() ? '#fff' : 'var(--text-secondary)'
           }}
         >
-          <Send size={18} color={input.trim() ? '#fff' : '#999'} />
+          <Send size={20} />
         </button>
       </form>
 
       <style>{`
+        /* Global override for coach page body */
+        body {
+          overscroll-behavior-y: contain;
+        }
+        
+        @media (max-width: 768px) {
+           .coach-page {
+               height: calc(100dvh - 66px) !important; /* bottom nav height applied */
+           }
+        }
+
         .markdown-content {
           font-size: 0.95rem;
-          line-height: 1.7;
+          line-height: 1.6;
+          color: var(--text-primary);
         }
         .markdown-content p {
           margin: 0 0 0.6rem 0;
@@ -251,11 +283,12 @@ const CareerCoach = () => {
         }
         .markdown-content strong {
           font-weight: 600;
+          color: inherit;
         }
         .markdown-content code {
-          background: #f0f0f0;
+          background: rgba(128, 128, 128, 0.15);
           padding: 0.15rem 0.4rem;
-          border-radius: 3px;
+          border-radius: 4px;
           font-size: 0.85em;
           font-family: 'Consolas', 'Monaco', monospace;
         }
@@ -266,6 +299,7 @@ const CareerCoach = () => {
           border-radius: 8px;
           overflow-x: auto;
           margin: 0.6rem 0;
+          border: 1px solid rgba(255,255,255,0.1);
         }
         .markdown-content pre code {
           background: none;
@@ -275,21 +309,28 @@ const CareerCoach = () => {
         }
         .markdown-content h1, .markdown-content h2, .markdown-content h3 {
           margin: 0.8rem 0 0.4rem 0;
-          font-family: var(--font-editorial);
+          font-family: var(--font-ui);
+          font-weight: 600;
         }
-        .markdown-content h3 { font-size: 1.1rem; }
-        .markdown-content h2 { font-size: 1.2rem; }
+        .markdown-content h3 { font-size: 1.05rem; }
+        .markdown-content h2 { font-size: 1.15rem; }
         .markdown-content blockquote {
-          border-left: 3px solid #ddd;
+          border-left: 3px solid var(--primary-color);
           padding-left: 1rem;
           margin: 0.5rem 0;
-          color: #666;
+          color: var(--text-secondary);
+          background: rgba(36, 88, 60, 0.05); /* very light green */
+          border-radius: 0 4px 4px 0;
+        }
+        
+        [data-theme='dark'] .markdown-content blockquote {
+          background: rgba(36, 88, 60, 0.2);
         }
 
         .typing-cursor {
           display: inline-block;
           animation: blink 0.7s step-end infinite;
-          color: #999;
+          color: var(--text-secondary);
           font-weight: 300;
           margin-left: 2px;
         }
@@ -306,7 +347,6 @@ const CareerCoach = () => {
         .typing-dots span {
           width: 8px;
           height: 8px;
-          background: #ccc;
           border-radius: 50%;
           animation: dotPulse 1.4s ease-in-out infinite;
         }
@@ -317,7 +357,7 @@ const CareerCoach = () => {
           40% { transform: scale(1); opacity: 1; }
         }
 
-        /* scrollbar */
+        /* custom scrollbar for messages */
         .coach-page div::-webkit-scrollbar {
           width: 6px;
         }
@@ -325,8 +365,11 @@ const CareerCoach = () => {
           background: transparent;
         }
         .coach-page div::-webkit-scrollbar-thumb {
-          background: #ddd;
+          background: var(--border-color);
           border-radius: 3px;
+        }
+        .coach-page div::-webkit-scrollbar-thumb:hover {
+          background: var(--text-secondary);
         }
       `}</style>
     </div>

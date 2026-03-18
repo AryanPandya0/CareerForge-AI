@@ -4,6 +4,7 @@
   flex-direction: column;
 }
 
+/* TOP NAVIGATION (Desktop) */
 .nav {
   position: sticky;
   top: 0;
@@ -14,9 +15,9 @@
 
 .nav.scrolled {
   padding: 1rem 0;
-  background: rgba(253, 253, 252, 0.8);
+  background: var(--nav-bg);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .nav-content {
@@ -35,6 +36,7 @@
 .nav-links {
   display: flex;
   gap: 2.5rem;
+  align-items: center;
 }
 
 .nav-link {
@@ -46,9 +48,61 @@
 }
 
 .nav-link.active {
-  color: var(--text-primary);
+  color: var(--primary-color);
+  font-weight: 700;
 }
 
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+.theme-toggle-btn:hover {
+  background: var(--glass-bg);
+}
+
+/* BOTTOM NAVIGATION (Mobile) */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: var(--nav-bg);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-color);
+  z-index: 100;
+  padding: 0.5rem 0;
+  padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+}
+
+.bottom-nav-content {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bottom-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+
+.bottom-nav-link.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+
+/* HERO */
 .hero {
   padding: 8rem 0 4rem;
   text-align: center;
@@ -71,15 +125,29 @@
   font-weight: 300;
 }
 
+.hero-btns {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
 .btn-primary {
-  background: var(--text-primary);
-  color: white;
+  background: var(--primary-color);
+  color: #fff; /* Ensure text is always readable on primary button */
   padding: 1.2rem 2.8rem;
   border: none;
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover {
+  background: var(--text-primary); /* Swap for contrast on hover */
+  transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -87,12 +155,21 @@
   color: var(--text-primary);
   padding: 1.2rem 2.8rem;
   border: 1px solid var(--text-primary);
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.btn-secondary:hover {
+  background: var(--text-primary);
+  color: var(--bg-color);
+}
+
+/* SECTION GRID */
 .section-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -102,20 +179,22 @@
 
 .card {
   padding: 3rem;
-  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   transition: all 0.4s ease;
-  background: white;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  border-color: #d0d0d0;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+  border-color: var(--primary-color);
+  box-shadow: 0 10px 30px rgba(36, 88, 60, 0.1); /* Subtle green shadow */
 }
 
 .card h3 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 .card p {
@@ -124,11 +203,37 @@
   font-weight: 300;
 }
 
+/* FOOTER */
 .footer {
   margin-top: auto;
   padding: 4rem 0;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
   text-align: center;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 900px) {
+  .hero h1 { font-size: 3.5rem; }
+  .section-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+}
+
+@media (max-width: 768px) {
+  /* Hide desktop links and show mobile bottom nav */
+  .nav-links { display: none; }
+  .bottom-nav { display: block; }
+  
+  .hero { padding: 4rem 0 2rem; }
+  .hero h1 { font-size: 2.5rem; }
+  .hero p { font-size: 1.1rem; }
+  .hero-btns { flex-direction: column; width: 100%; padding: 0 1rem; }
+  .btn-primary, .btn-secondary { width: 100%; padding: 1rem; }
+  
+  .section-grid { grid-template-columns: 1fr; }
+  
+  /* Add padding bottom to main content so bottom nav doesn't cover it */
+  .main-content { padding-bottom: 80px; }
+  
+  .container { padding: 0 1rem; }
 }

@@ -89,7 +89,7 @@ const ATSScanner = () => {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '4rem' }}>
+      <div className="scanner-layout">
         {/* Left: Inputs */}
         <div>
           <div className="input-group">
@@ -110,48 +110,48 @@ const ATSScanner = () => {
                 onClick={() => setInputMethod('upload')}
                 style={{
                   flex: 1, padding: '0.8rem', fontSize: '0.8rem', cursor: 'pointer',
-                  background: inputMethod === 'upload' ? '#1a1a1a' : 'white',
-                  color: inputMethod === 'upload' ? 'white' : '#1a1a1a',
-                  border: '1px solid #1a1a1a', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em'
+                  background: inputMethod === 'upload' ? 'var(--primary-color)' : 'var(--card-bg)',
+                  color: inputMethod === 'upload' ? '#fff' : 'var(--text-primary)',
+                  border: '1px solid var(--border-color)', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em'
                 }}
               >
-                UPLOAD PDF FILE
+                UPLOAD PDF
               </button>
               <button
                 type="button"
                 onClick={() => setInputMethod('paste')}
                 style={{
                   flex: 1, padding: '0.8rem', fontSize: '0.8rem', cursor: 'pointer',
-                  background: inputMethod === 'paste' ? '#1a1a1a' : 'white',
-                  color: inputMethod === 'paste' ? 'white' : '#1a1a1a',
-                  border: '1px solid #1a1a1a', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em'
+                  background: inputMethod === 'paste' ? 'var(--primary-color)' : 'var(--card-bg)',
+                  color: inputMethod === 'paste' ? '#fff' : 'var(--text-primary)',
+                  border: '1px solid var(--border-color)', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em'
                 }}
               >
-                IMPORT / PASTE TEXT
+                IMPORT TEXT
               </button>
             </div>
 
             {inputMethod === 'upload' ? (
-              <div style={{ padding: '2rem', textAlign: 'center', border: '2px dashed #ccc', background: '#fafafa' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', border: '2px dashed var(--border-color)', background: 'var(--card-bg)', borderRadius: '4px' }}>
                 <input type="file" accept=".pdf" onChange={handleFileUpload} id="pdf-upload" style={{ display: 'none' }} />
                 <label htmlFor="pdf-upload" style={{ cursor: 'pointer', display: 'block' }}>
                   {extracting ? (
-                    <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 0.5rem' }} />
+                    <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 0.5rem', color: 'var(--primary-color)' }} />
                   ) : (
-                    <Upload size={24} style={{ margin: '0 auto 0.5rem', display: 'block' }} />
+                    <Upload size={24} style={{ margin: '0 auto 0.5rem', display: 'block', color: 'var(--primary-color)' }} />
                   )}
-                  <p style={{ fontSize: '0.9rem', color: '#666' }}>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     {extracting ? 'Extracting text...' : 'Upload your existing Resume (PDF)'}
                   </p>
                 </label>
                 {resumeText && inputMethod === 'upload' && (
-                  <p style={{ marginTop: '1rem', color: '#155724', fontSize: '0.85rem' }}>✅ PDF Loaded Successfully!</p>
+                  <p style={{ marginTop: '1rem', color: 'var(--primary-color)', fontSize: '0.85rem' }}>✅ PDF Loaded Successfully!</p>
                 )}
               </div>
             ) : (
               <div>
                 {sessionStorage.getItem('resume_text') && (
-                  <p style={{ padding: '0.8rem', background: '#cce5ff', border: '1px solid #b8daff', color: '#004085', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                  <p style={{ padding: '0.8rem', background: 'rgba(36, 88, 60, 0.1)', border: '1px solid var(--border-color)', color: 'var(--primary-color)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
                     💡 Found content from the Resume Builder! Pre-filled below.
                   </p>
                 )}
@@ -178,7 +178,7 @@ const ATSScanner = () => {
         {/* Right: Results */}
         <div>
           {!analysis && !loading && (
-            <div className="glass" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', padding: '4rem', textAlign: 'center' }}>
+            <div className="glass" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', padding: '4rem', textAlign: 'center' }}>
               <p>Submit your resume and job description to see your analysis report.</p>
             </div>
           )}
@@ -189,11 +189,12 @@ const ATSScanner = () => {
               <div style={{
                 padding: '1.5rem 2rem',
                 marginBottom: '2rem',
-                background: analysis.is_hirable ? '#d4edda' : '#f8d7da',
-                border: `1px solid ${analysis.is_hirable ? '#c3e6cb' : '#f5c6cb'}`,
-                color: analysis.is_hirable ? '#155724' : '#721c24'
+                background: analysis.is_hirable ? 'rgba(40, 167, 69, 0.1)' : 'rgba(220, 53, 69, 0.1)',
+                border: `1px solid ${analysis.is_hirable ? '#28a745' : '#dc3545'}`,
+                color: 'var(--text-primary)',
+                borderRadius: '4px'
               }}>
-                <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem', fontFamily: 'var(--font-editorial)' }}>
+                <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem', fontFamily: 'var(--font-editorial)', color: analysis.is_hirable ? '#28a745' : '#dc3545' }}>
                   🎯 Final Verdict
                 </h3>
                 <p style={{ fontSize: '1rem' }}>
@@ -204,23 +205,23 @@ const ATSScanner = () => {
               </div>
 
               {/* Metrics */}
-              <div style={{ display: 'grid', gridTemplateColumns: analysis.is_hirable ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ padding: '1.5rem', background: '#fcfcfc', border: '1px solid #efefef', textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>ATS SCORE</p>
-                  <p style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-editorial)' }}>{analysis.ats_score}%</p>
+              <div className="metrics-grid">
+                <div style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border-color)', textAlign: 'center', borderRadius: '4px' }}>
+                  <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>ATS SCORE</p>
+                  <p style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-editorial)', color: 'var(--primary-color)' }}>{analysis.ats_score}%</p>
                 </div>
-                <div style={{ padding: '1.5rem', background: '#fcfcfc', border: '1px solid #efefef', textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>ROLE</p>
+                <div style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border-color)', textAlign: 'center', borderRadius: '4px' }}>
+                  <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>ROLE</p>
                   <p style={{ fontSize: '1rem', fontWeight: 600 }}>{analysis.recommended_role}</p>
                 </div>
-                <div style={{ padding: '1.5rem', background: '#fcfcfc', border: '1px solid #efefef', textAlign: 'center' }}>
-                  <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>READINESS</p>
+                <div style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border-color)', textAlign: 'center', borderRadius: '4px' }}>
+                  <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>READINESS</p>
                   <p style={{ fontSize: '1rem', fontWeight: 600 }}>{analysis.placement_readiness}</p>
                 </div>
                 {analysis.is_hirable && (
-                  <div style={{ padding: '1.5rem', background: '#f5f6ff', border: '1px solid #e0e4ff', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>✨ EST. SALARY</p>
-                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{analysis.salary_estimation}</p>
+                  <div style={{ padding: '1.5rem', background: 'rgba(36, 88, 60, 0.05)', border: '1px solid var(--primary-color)', textAlign: 'center', borderRadius: '4px' }}>
+                    <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>✨ EST. SALARY</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary-color)' }}>{analysis.salary_estimation}</p>
                   </div>
                 )}
               </div>
@@ -229,11 +230,11 @@ const ATSScanner = () => {
               <div style={{ marginBottom: '2rem' }}>
                 <h4 style={{ fontSize: '1rem', marginBottom: '1rem' }}>🚨 Critical Missing Skills</h4>
                 {analysis.missing_keywords && analysis.missing_keywords.length > 0 ? (
-                  <div style={{ padding: '1rem', background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24' }}>
-                    Missing: {analysis.missing_keywords.join(', ')}
+                  <div style={{ padding: '1rem', background: 'rgba(220, 53, 69, 0.1)', border: '1px solid #dc3545', color: 'var(--text-primary)', borderRadius: '4px' }}>
+                    Missing: <strong style={{color: '#dc3545'}}>{analysis.missing_keywords.join(', ')}</strong>
                   </div>
                 ) : (
-                  <div style={{ padding: '1rem', background: '#d4edda', border: '1px solid #c3e6cb', color: '#155724' }}>
+                  <div style={{ padding: '1rem', background: 'rgba(40, 167, 69, 0.1)', border: '1px solid #28a745', color: 'var(--text-primary)', borderRadius: '4px' }}>
                     ✅ All keywords matched!
                   </div>
                 )}
@@ -243,7 +244,7 @@ const ATSScanner = () => {
               <div>
                 <h4 style={{ fontSize: '1rem', marginBottom: '1rem' }}>💡 Improvement Plan</h4>
                 {analysis.improvement_tips.map((tip, i) => (
-                  <div key={i} style={{ padding: '0.8rem 1rem', background: '#cce5ff', border: '1px solid #b8daff', color: '#004085', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
+                  <div key={i} style={{ padding: '0.8rem 1rem', background: 'var(--card-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', marginBottom: '0.5rem', fontSize: '0.95rem', borderRadius: '4px' }}>
                     • {tip}
                   </div>
                 ))}
@@ -254,29 +255,53 @@ const ATSScanner = () => {
       </div>
 
       <style>{`
+        .scanner-layout {
+          display: grid;
+          grid-template-columns: 1fr 1.2fr;
+          gap: 4rem;
+        }
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+           .metrics-grid {
+             grid-template-columns: repeat(2, 1fr);
+           }
+        }
+        @media (max-width: 768px) {
+           .scanner-layout {
+              grid-template-columns: 1fr;
+              gap: 2rem;
+           }
+        }
         .input-group label {
           display: block;
           font-size: 0.8rem;
           text-transform: uppercase;
           letter-spacing: 0.1em;
           margin-bottom: 0.5rem;
-          color: #888;
+          color: var(--text-secondary);
         }
         .input-group textarea {
           width: 100%;
           padding: 1rem;
-          border: 1px solid #e0e0e0;
-          background: #fafafa;
+          border: 1px solid var(--border-color);
+          background: var(--card-bg);
+          color: var(--text-primary);
           font-family: var(--font-ui);
           font-size: 1rem;
           transition: border-color 0.2s ease;
           resize: vertical;
-          border-radius: 2px;
+          border-radius: 4px;
         }
         .input-group textarea:focus {
           outline: none;
-          border-color: var(--text-primary);
-          background: white;
+          border-color: var(--primary-color);
+          background: var(--bg-color);
         }
         .animate-spin {
           animation: spin 1s linear infinite;

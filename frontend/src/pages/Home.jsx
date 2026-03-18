@@ -56,25 +56,41 @@ const Home = () => {
 
       <section className="how-it-works container" style={{ padding: '8rem 0' }}>
         <h2 style={{ fontSize: '3rem', marginBottom: '4rem', textAlign: 'center' }}>The Process</h2>
-        <div className="section-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem' }}>
+        <div className="process-grid">
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>01. INPUT</h4>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>01. INPUT</h4>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Provide your raw data or upload an existing profile.</p>
           </div>
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>02. REFINE</h4>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>02. REFINE</h4>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Our AI architect structures and elevates your professional narrative.</p>
           </div>
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>03. ANALYZE</h4>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>03. ANALYZE</h4>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Compare against target specifications to ensure perfection.</p>
           </div>
           <div>
-            <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>04. EXECUTE</h4>
+            <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-primary)' }}>04. EXECUTE</h4>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Download your polished PDF and secure your next role.</p>
           </div>
         </div>
       </section>
+
+      <style>{`
+        .process-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 2rem;
+        }
+        @media (max-width: 900px) {
+          .process-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+          .process-grid { grid-template-columns: 1fr; }
+          .how-it-works { padding: 4rem 0 !important; }
+          .how-it-works h2 { font-size: 2.5rem !important; margin-bottom: 2rem !important; }
+        }
+      `}</style>
     </div>
   );
 };
