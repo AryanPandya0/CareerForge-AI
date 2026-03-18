@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Download, Loader2 } from 'lucide-react';
+import { saveAs } from 'file-saver';
 
 const API_URL = 'http://localhost:8000';
 
@@ -57,13 +58,52 @@ const ResumeBuilder = () => {
   };
 
   const downloadPdf = () => {
-    if (!result || !result.pdf_base64) return;
-    const link = document.createElement('a');
-    link.href = `data:application/pdf;base64,${result.pdf_base64}`;
-    link.download = `${formData.profile_name}_Resume.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    console.log("Download triggered. Result state:", !!result);
+    if (!result || !result.pdf_base64) {
+      console.error("PDF data missing from state!");
+      setError('❌ PDF data is missing. Please generate the resume again.');
+      return;
+    }
+    
+    console.log("Base64 Length:", result.pdf_base64.length);
+    console.log("Base64 Preview:", result.pdf_base64.substring(0, 50));
+
+    try {
+      // Decode base64 to binary string
+      const byteCharacters = atob(result.pdf_base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      
+      // Create a Blob
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const filename = `${formData.profile_name ? formData.profile_name.replace(/\s+/g, '_') : 'My'}_Resume.pdf`;
+      
+      console.log("Attempting saveAs with filename:", filename);
+      // Attempt 1: FileSaver
+      try {
+        saveAs(blob, filename);
+        console.log("saveAs called successfully");
+      } catch (fsErr) {
+        console.error("FileSaver failed, trying fallback anchor:", fsErr);
+        // Attempt 2: Fallback Anchor
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log("Fallback anchor triggered");
+      }
+      
+    } catch (err) {
+      console.error('Failed to decode/download PDF:', err);
+      setError('❌ Failed to construct the PDF file. Please try generating it again.');
+    }
   };
 
   return (

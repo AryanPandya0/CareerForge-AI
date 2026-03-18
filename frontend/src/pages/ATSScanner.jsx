@@ -94,9 +94,9 @@ const ATSScanner = () => {
         <div>
           <div className="input-group">
             <label>1. Target Job Description</label>
-            <textarea 
-              value={jobDescription} 
-              onChange={(e) => setJobDescription(e.target.value)} 
+            <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
               placeholder="e.g. We are looking for a Python Developer with 2 years of experience..."
               style={{ height: '150px' }}
             />
@@ -105,10 +105,10 @@ const ATSScanner = () => {
           <div className="input-group" style={{ marginTop: '2rem' }}>
             <label>2. Your Resume</label>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-              <button 
+              <button
                 type="button"
                 onClick={() => setInputMethod('upload')}
-                style={{ 
+                style={{
                   flex: 1, padding: '0.8rem', fontSize: '0.8rem', cursor: 'pointer',
                   background: inputMethod === 'upload' ? '#1a1a1a' : 'white',
                   color: inputMethod === 'upload' ? 'white' : '#1a1a1a',
@@ -117,10 +117,10 @@ const ATSScanner = () => {
               >
                 UPLOAD PDF FILE
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setInputMethod('paste')}
-                style={{ 
+                style={{
                   flex: 1, padding: '0.8rem', fontSize: '0.8rem', cursor: 'pointer',
                   background: inputMethod === 'paste' ? '#1a1a1a' : 'white',
                   color: inputMethod === 'paste' ? 'white' : '#1a1a1a',
@@ -155,9 +155,9 @@ const ATSScanner = () => {
                     💡 Found content from the Resume Builder! Pre-filled below.
                   </p>
                 )}
-                <textarea 
-                  value={resumeText} 
-                  onChange={(e) => setResumeText(e.target.value)} 
+                <textarea
+                  value={resumeText}
+                  onChange={(e) => setResumeText(e.target.value)}
                   placeholder="Paste your resume text here..."
                   style={{ height: '300px' }}
                 />
@@ -165,10 +165,10 @@ const ATSScanner = () => {
             )}
           </div>
 
-          <button 
-            className="btn-primary" 
-            onClick={handleAnalyze} 
-            disabled={loading} 
+          <button
+            className="btn-primary"
+            onClick={handleAnalyze}
+            disabled={loading}
             style={{ width: '100%', marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
           >
             {loading ? <><Loader2 size={18} className="animate-spin" /> Analyzing...</> : '🚀 Analyze Resume'}
@@ -186,9 +186,9 @@ const ATSScanner = () => {
           {analysis && (
             <div className="analysis-report" style={{ animation: 'fadeIn 0.5s ease-out' }}>
               {/* Verdict Banner */}
-              <div style={{ 
-                padding: '1.5rem 2rem', 
-                marginBottom: '2rem', 
+              <div style={{
+                padding: '1.5rem 2rem',
+                marginBottom: '2rem',
                 background: analysis.is_hirable ? '#d4edda' : '#f8d7da',
                 border: `1px solid ${analysis.is_hirable ? '#c3e6cb' : '#f5c6cb'}`,
                 color: analysis.is_hirable ? '#155724' : '#721c24'
@@ -197,7 +197,7 @@ const ATSScanner = () => {
                   🎯 Final Verdict
                 </h3>
                 <p style={{ fontSize: '1rem' }}>
-                  {analysis.is_hirable 
+                  {analysis.is_hirable
                     ? `✅ YOU ARE HIRED! Based on your profile, you are a strong match for the ${analysis.recommended_role} position.`
                     : `⚠️ NOT SELECTED. Currently, your profile does not meet the requirements. You need to upskill.`}
                 </p>
