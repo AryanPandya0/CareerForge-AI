@@ -1,62 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Target, Loader2, TrendingUp, AlertCircle, CheckCircle2, Upload, FileText, Sparkles } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
+
+const API_URL = 'http://localhost:8000';
 
 const ATSScanner = () => {
   const [jobDescription, setJobDescription] = useState('');
   const [resumeText, setResumeText] = useState('');
-  const [inputMethod, setInputMethod] = useState('upload'); // 'upload' or 'paste'
+  const [inputMethod, setInputMethod] = useState('paste');
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const savedResume = sessionStorage.getItem('resume_text');
-    if (savedResume && !resumeText && inputMethod === 'paste') {
+    if (savedResume) {
       setResumeText(savedResume);
+      setInputMethod('paste');
     }
-  }, [inputMethod]);
+  }, []);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setExtracting(true);
+    setError('');
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://localhost:8000/extract-pdf', formData);
+      const response = await axios.post(`${API_URL}/extract-pdf`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       if (response.data.text) {
         setResumeText(response.data.text);
-        alert('PDF Loaded Successfully!');
-      } else {
-        alert('Error reading PDF: ' + response.data.error);
+      } else if (response.data.error) {
+        setError('Error reading PDF: ' + response.data.error);
       }
-    } catch (error) {
-      console.error('Error uploading PDF:', error);
-      alert('Failed to extract text from PDF.');
+    } catch (err) {
+      console.error('Error uploading PDF:', err);
+      setError('Failed to extract text from PDF.');
     } finally {
       setExtracting(false);
     }
   };
 
   const handleAnalyze = async () => {
-    if (!jobDescription || !resumeText) {
-      alert('Please provide both a Job Description and Resume text.');
+    setError('');
+    if (!jobDescription) {
+      setError('⚠️ Please paste a Job Description first.');
+      return;
+    }
+    if (!resumeText) {
+      setError('⚠️ Please provide a resume (Upload or Paste).');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/ats/analyze', {
+      const response = await axios.post(`${API_URL}/ats/analyze`, {
         resume_text: resumeText,
         job_description: jobDescription
       });
       setAnalysis(response.data);
-    } catch (error) {
-      console.error('Error analyzing resume:', error);
-      alert('Analysis failed. Please try again.');
+    } catch (err) {
+      console.error('Error analyzing resume:', err);
+      const detail = err.response?.data?.detail || 'Analysis failed. Please try again.';
+      setError(`❌ ${detail}`);
     } finally {
       setLoading(false);
     }
@@ -64,17 +76,24 @@ const ATSScanner = () => {
 
   return (
     <div className="scanner-page container" style={{ padding: '4rem 0' }}>
-      <header style={{ marginBottom: '4rem' }}>
-        <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>ATS Intelligence</h2>
+      <header style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📊 ATS Resume Score & Salary Predictor</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', maxWidth: '600px' }}>
-          Check if your resume is ready for the real world. Quantify your match and discover technical gaps.
+          Check if your resume is ready for the real world.
         </p>
       </header>
 
-      <div className="scanner-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '4rem' }}>
-        <div className="input-section">
+      {error && (
+        <div style={{ padding: '1rem 1.5rem', background: '#f8d7da', border: '1px solid #f5c6cb', marginBottom: '2rem', color: '#721c24' }}>
+          {error}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '4rem' }}>
+        {/* Left: Inputs */}
+        <div>
           <div className="input-group">
-            <label>1. Target Specification (Job Description)</label>
+            <label>1. Target Job Description</label>
             <textarea 
               value={jobDescription} 
               onChange={(e) => setJobDescription(e.target.value)} 
@@ -83,153 +102,188 @@ const ATSScanner = () => {
             />
           </div>
 
-          <div className="input-group" style={{ marginTop: '2.5rem' }}>
+          <div className="input-group" style={{ marginTop: '2rem' }}>
             <label>2. Your Resume</label>
-            <div className="method-selector" style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
               <button 
-                className={`btn-secondary ${inputMethod === 'upload' ? 'active-method' : ''}`} 
+                type="button"
                 onClick={() => setInputMethod('upload')}
-                style={{ flex: 1, padding: '0.8rem', fontSize: '0.8rem', borderColor: inputMethod === 'upload' ? 'black' : '#eee' }}
+                style={{ 
+                  flex: 1, padding: '0.8rem', fontSize: '0.8rem', cursor: 'pointer',
+                  background: inputMethod === 'upload' ? '#1a1a1a' : 'white',
+                  color: inputMethod === 'upload' ? 'white' : '#1a1a1a',
+                  border: '1px solid #1a1a1a', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em'
+                }}
               >
-                UPLOAD PDF
+                UPLOAD PDF FILE
               </button>
               <button 
-                className={`btn-secondary ${inputMethod === 'paste' ? 'active-method' : ''}`} 
+                type="button"
                 onClick={() => setInputMethod('paste')}
-                style={{ flex: 1, padding: '0.8rem', fontSize: '0.8rem', borderColor: inputMethod === 'paste' ? 'black' : '#eee' }}
+                style={{ 
+                  flex: 1, padding: '0.8rem', fontSize: '0.8rem', cursor: 'pointer',
+                  background: inputMethod === 'paste' ? '#1a1a1a' : 'white',
+                  color: inputMethod === 'paste' ? 'white' : '#1a1a1a',
+                  border: '1px solid #1a1a1a', fontFamily: 'var(--font-ui)', letterSpacing: '0.05em'
+                }}
               >
-                PASTE / IMPORT
+                IMPORT / PASTE TEXT
               </button>
             </div>
 
             {inputMethod === 'upload' ? (
-              <div className="upload-box glass" style={{ padding: '2rem', textAlign: 'center', border: '1px dashed #ccc' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', border: '2px dashed #ccc', background: '#fafafa' }}>
                 <input type="file" accept=".pdf" onChange={handleFileUpload} id="pdf-upload" style={{ display: 'none' }} />
-                <label htmlFor="pdf-upload" style={{ cursor: 'pointer' }}>
-                  {extracting ? <Loader2 className="animate-spin" style={{ margin: '0 auto' }} /> : <Upload style={{ margin: '0 auto 1rem' }} />}
-                  <p style={{ fontSize: '0.9rem' }}>{extracting ? 'Extracting text...' : 'Click to upload your existing Resume (PDF)'}</p>
+                <label htmlFor="pdf-upload" style={{ cursor: 'pointer', display: 'block' }}>
+                  {extracting ? (
+                    <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 0.5rem' }} />
+                  ) : (
+                    <Upload size={24} style={{ margin: '0 auto 0.5rem', display: 'block' }} />
+                  )}
+                  <p style={{ fontSize: '0.9rem', color: '#666' }}>
+                    {extracting ? 'Extracting text...' : 'Upload your existing Resume (PDF)'}
+                  </p>
                 </label>
+                {resumeText && inputMethod === 'upload' && (
+                  <p style={{ marginTop: '1rem', color: '#155724', fontSize: '0.85rem' }}>✅ PDF Loaded Successfully!</p>
+                )}
               </div>
             ) : (
-              <textarea 
-                value={resumeText} 
-                onChange={(e) => setResumeText(e.target.value)} 
-                placeholder="Paste your resume content here..."
-                style={{ height: '300px' }}
-              />
+              <div>
+                {sessionStorage.getItem('resume_text') && (
+                  <p style={{ padding: '0.8rem', background: '#cce5ff', border: '1px solid #b8daff', color: '#004085', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                    💡 Found content from the Resume Builder! Pre-filled below.
+                  </p>
+                )}
+                <textarea 
+                  value={resumeText} 
+                  onChange={(e) => setResumeText(e.target.value)} 
+                  placeholder="Paste your resume text here..."
+                  style={{ height: '300px' }}
+                />
+              </div>
             )}
           </div>
 
-          <button className="btn-primary" onClick={handleAnalyze} disabled={loading} style={{ width: '100%', marginTop: '2rem' }}>
-            {loading ? <Loader2 className="animate-spin" /> : '🚀 ANALYZE RESUME'}
+          <button 
+            className="btn-primary" 
+            onClick={handleAnalyze} 
+            disabled={loading} 
+            style={{ width: '100%', marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+          >
+            {loading ? <><Loader2 size={18} className="animate-spin" /> Analyzing...</> : '🚀 Analyze Resume'}
           </button>
         </div>
 
-        <div className="result-section">
-          {!analysis && (
+        {/* Right: Results */}
+        <div>
+          {!analysis && !loading && (
             <div className="glass" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', padding: '4rem', textAlign: 'center' }}>
-              <p>Execute analytics to generate your professional readiness report.</p>
+              <p>Submit your resume and job description to see your analysis report.</p>
             </div>
           )}
 
           {analysis && (
-            <div className="analysis-report animate-fade-in">
-              <div className={`verdict-banner ${analysis.is_hirable ? 'hired' : 'not-selected'}`} style={{ 
-                padding: '2rem', 
+            <div className="analysis-report" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+              {/* Verdict Banner */}
+              <div style={{ 
+                padding: '1.5rem 2rem', 
                 marginBottom: '2rem', 
-                background: analysis.is_hirable ? '#e8f5e9' : '#ffebee',
-                borderLeft: `5px solid ${analysis.is_hirable ? '#2e7d32' : '#c62828'}`
+                background: analysis.is_hirable ? '#d4edda' : '#f8d7da',
+                border: `1px solid ${analysis.is_hirable ? '#c3e6cb' : '#f5c6cb'}`,
+                color: analysis.is_hirable ? '#155724' : '#721c24'
               }}>
-                <h3 style={{ fontSize: '1.5rem', color: analysis.is_hirable ? '#1b5e20' : '#b71c1c', marginBottom: '0.5rem', fontFamily: 'var(--font-editorial)' }}>
-                  {analysis.is_hirable ? '✅ YOU ARE HIRED!' : '⚠️ NOT SELECTED'}
+                <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem', fontFamily: 'var(--font-editorial)' }}>
+                  🎯 Final Verdict
                 </h3>
-                <p style={{ fontSize: '0.9rem', color: analysis.is_hirable ? '#2e7d32' : '#c62828' }}>
+                <p style={{ fontSize: '1rem' }}>
                   {analysis.is_hirable 
-                    ? `Based on your profile, you are a strong match for the ${analysis.recommended_role} position.` 
-                    : `Currently, your profile does not meet the requirements for this role. You need to upskill.`}
+                    ? `✅ YOU ARE HIRED! Based on your profile, you are a strong match for the ${analysis.recommended_role} position.`
+                    : `⚠️ NOT SELECTED. Currently, your profile does not meet the requirements. You need to upskill.`}
                 </p>
               </div>
 
-              <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: analysis.is_hirable ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-                <div className="metric-card">
-                  <label>ATS SCORE</label>
-                  <p>{analysis.ats_score}%</p>
+              {/* Metrics */}
+              <div style={{ display: 'grid', gridTemplateColumns: analysis.is_hirable ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ padding: '1.5rem', background: '#fcfcfc', border: '1px solid #efefef', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>ATS SCORE</p>
+                  <p style={{ fontSize: '2rem', fontWeight: 700, fontFamily: 'var(--font-editorial)' }}>{analysis.ats_score}%</p>
                 </div>
-                <div className="metric-card">
-                  <label>ROLE</label>
-                  <p>{analysis.recommended_role}</p>
+                <div style={{ padding: '1.5rem', background: '#fcfcfc', border: '1px solid #efefef', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>ROLE</p>
+                  <p style={{ fontSize: '1rem', fontWeight: 600 }}>{analysis.recommended_role}</p>
                 </div>
-                <div className="metric-card">
-                  <label>READINESS</label>
-                  <p>{analysis.placement_readiness}</p>
+                <div style={{ padding: '1.5rem', background: '#fcfcfc', border: '1px solid #efefef', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>READINESS</p>
+                  <p style={{ fontSize: '1rem', fontWeight: 600 }}>{analysis.placement_readiness}</p>
                 </div>
                 {analysis.is_hirable && (
-                  <div className="metric-card highlight">
-                    <label>✨ EST. SALARY</label>
-                    <p>{analysis.salary_estimation}</p>
+                  <div style={{ padding: '1.5rem', background: '#f5f6ff', border: '1px solid #e0e4ff', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.65rem', color: '#888', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>✨ EST. SALARY</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{analysis.salary_estimation}</p>
                   </div>
                 )}
               </div>
 
-              <div className="editorial-divider" style={{ opacity: 0.1 }}></div>
-
-              <div className="insights-section">
-                <h4 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', color: '#888', marginBottom: '1.5rem' }}>🚨 CRITICAL MISSING SKILLS</h4>
+              {/* Missing Skills */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h4 style={{ fontSize: '1rem', marginBottom: '1rem' }}>🚨 Critical Missing Skills</h4>
                 {analysis.missing_keywords && analysis.missing_keywords.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '3rem' }}>
-                    {analysis.missing_keywords.map((kw, i) => (
-                      <span key={i} style={{ background: '#fff1f1', color: '#d32f2f', padding: '0.5rem 1rem', fontSize: '0.8rem', border: '1px solid #ffdde0' }}>
-                        {kw}
-                      </span>
-                    ))}
+                  <div style={{ padding: '1rem', background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24' }}>
+                    Missing: {analysis.missing_keywords.join(', ')}
                   </div>
                 ) : (
-                  <p style={{ color: '#2e7d32', marginBottom: '3rem', fontSize: '0.9rem' }}>✅ All keywords matched!</p>
+                  <div style={{ padding: '1rem', background: '#d4edda', border: '1px solid #c3e6cb', color: '#155724' }}>
+                    ✅ All keywords matched!
+                  </div>
                 )}
+              </div>
 
-                <h4 style={{ fontSize: '0.8rem', letterSpacing: '0.1em', color: '#888', marginBottom: '1.5rem' }}>💡 IMPROVEMENT PLAN</h4>
-                <ul className="improvement-list" style={{ listStyle: 'none', padding: 0 }}>
-                  {analysis.improvement_tips.map((tip, i) => (
-                    <li key={i} style={{ marginBottom: '1.2rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                      <span style={{ color: '#1a237e', marginTop: '0.2rem' }}>•</span>
-                      <span style={{ fontSize: '1rem', color: '#444', lineHeight: '1.6' }}>{tip}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* Improvement Tips */}
+              <div>
+                <h4 style={{ fontSize: '1rem', marginBottom: '1rem' }}>💡 Improvement Plan</h4>
+                {analysis.improvement_tips.map((tip, i) => (
+                  <div key={i} style={{ padding: '0.8rem 1rem', background: '#cce5ff', border: '1px solid #b8daff', color: '#004085', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
+                    • {tip}
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <style jsx>{`
-        .active-method {
-          background: #000 !important;
-          color: #fff !important;
-        }
-        .metric-card {
-           padding: 1.5rem;
-           background: #fcfcfc;
-           border: 1px solid #efefef;
-        }
-        .metric-card label {
+      <style>{`
+        .input-group label {
           display: block;
-          font-size: 0.6rem;
+          font-size: 0.8rem;
+          text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: #888;
           margin-bottom: 0.5rem;
+          color: #888;
         }
-        .metric-card p {
-          font-size: 1.2rem;
-          font-weight: 700;
-          font-family: var(--font-editorial);
+        .input-group textarea {
+          width: 100%;
+          padding: 1rem;
+          border: 1px solid #e0e0e0;
+          background: #fafafa;
+          font-family: var(--font-ui);
+          font-size: 1rem;
+          transition: border-color 0.2s ease;
+          resize: vertical;
+          border-radius: 2px;
         }
-        .metric-card.highlight {
-          background: #f5f6ff;
-          border-color: #e0e4ff;
+        .input-group textarea:focus {
+          outline: none;
+          border-color: var(--text-primary);
+          background: white;
         }
-        .animate-fade-in {
-          animation: fadeIn 0.8s ease-out forwards;
+        .animate-spin {
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }

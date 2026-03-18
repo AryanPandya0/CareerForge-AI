@@ -6,7 +6,8 @@ from PyPDF2 import PdfReader
 import os
 import io
 
-load_dotenv()
+# Load .env from project root (one level up from backend/)
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = FastAPI(title="CareerForge AI API")
 
@@ -27,7 +28,9 @@ async def extract_pdf(file: UploadFile = File(...)):
         reader = PdfReader(pdf_file)
         text = ""
         for page in reader.pages:
-            text += page.extract_text()
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
         return {"text": text}
     except Exception as e:
         return {"error": str(e)}

@@ -9,23 +9,26 @@ router = APIRouter(prefix="/resume", tags=["resume"])
 
 class ResumeRequest(BaseModel):
     profile_name: str
-    email: str
-    phone: str
-    github: str
-    summary: str
-    skills: str
-    projects: str
-    experience: str
-    education: str
+    email: str = ""
+    phone: str = ""
+    github: str = ""
+    summary: str = ""
+    skills: str = ""
+    projects: str = ""
+    experience: str = ""
+    education: str = ""
     other_info: Optional[str] = ""
     achievements: Optional[str] = ""
-    job_desc: str
+    job_desc: str = ""
     template_choice: str = "Modern (Bold Header)"
     theme_color: str = "#1A237E"
 
 @router.post("/generate")
 async def generate_resume(request: ResumeRequest):
     try:
+        if not request.profile_name or not request.skills:
+            raise HTTPException(status_code=400, detail="Please enter at least your Name and Skills.")
+        
         # Generate structured data using AI
         ai_data = generate_resume_data(
             request.profile_name, request.summary, request.skills, request.projects,
@@ -35,20 +38,32 @@ async def generate_resume(request: ResumeRequest):
         
         # Convert hex color to RGB
         hex_color = request.theme_color.lstrip('#')
-        rgb_color = tuple(int(hex_color[i:i+2], 16) for i in range(0, 6, 2))
+        rgb_color = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
         
         # Prepare contact info from request
         contact_info = f"{request.email}  |  {request.phone}  |  {request.github}"
         
+        # Convert Pydantic model to dict
+        try:
+            ai_dict = ai_data.model_dump()
+        except AttributeError:
+            ai_dict = ai_data.dict()
+        
         # Generate PDF
-        pdf_content = generate_pdf_resume(
-            ai_data.dict(), contact_info, request.template_choice, rgb_color
+        pdf_bytes = generate_pdf_resume(
+            ai_dict, contact_info, request.template_choice, rgb_color
         )
+        
+        # Build full resume text for ATS scanner
+        full_resume_text = f"{ai_dict['summary']}\n\nSKILLS: {', '.join(ai_dict['skills'])}\n\nEXPERIENCE: {chr(10).join(ai_dict['experience'])}\n\nPROJECTS: {chr(10).join(ai_dict['projects'])}"
         
         # Return AI data and base64 encoded PDF
         return {
-            "ai_data": ai_data,
-            "pdf_base64": base64.b64encode(pdf_content).decode('utf-8')
+            "ai_data": ai_dict,
+            "pdf_base64": base64.b64encode(pdf_bytes).decode('utf-8'),
+            "full_resume_text": full_resume_text
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

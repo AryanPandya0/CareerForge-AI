@@ -1,18 +1,18 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
 from services.ai_service import get_chat_response
 from langchain_core.messages import HumanMessage, AIMessage
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 class ChatMessage(BaseModel):
-    role: str # 'human' or 'ai'
+    role: str  # 'human' or 'ai'
     content: str
 
 class ChatRequest(BaseModel):
     query: str
-    history: List[ChatMessage]
+    history: List[ChatMessage] = []
 
 @router.post("/query")
 async def chat_query(request: ChatRequest):
@@ -22,7 +22,7 @@ async def chat_query(request: ChatRequest):
         for msg in request.history:
             if msg.role == 'human':
                 langchain_history.append(HumanMessage(content=msg.content))
-            else:
+            elif msg.role == 'ai':
                 langchain_history.append(AIMessage(content=msg.content))
         
         response = get_chat_response(request.query, langchain_history)

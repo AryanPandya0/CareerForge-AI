@@ -31,12 +31,12 @@ class ResumeDataSchema(BaseModel):
 
 class ATSAnalysisSchema(BaseModel):
     ats_score: int = Field(..., description="A score out of 100 based on the match between Resume and Job Description.")
-    recommended_role: str = Field(..., description="The best matching job title.")
-    missing_keywords: List[str] = Field(..., description="List of technical skills or keywords missing in the Resume.")
+    recommended_role: str = Field(..., description="The best matching job title (e.g., 'AI Engineer', 'Data Scientist','Generative AI','Machine Learning Engineer').")
+    missing_keywords: List[str] = Field(..., description="List of technical skills or keywords present in the JD but missing in the Resume.")
     placement_readiness: str = Field(..., description="A verdict: 'High', 'Medium', or 'Low' readiness for the job.")
-    is_hirable: bool = Field(..., description="True if the candidate is job-ready.")
-    salary_estimation: str = Field(..., description="Estimated salary range in 'LPA' format.")
-    improvement_tips: List[str] = Field(..., description="3 specific, actionable tips to improve the resume.")
+    is_hirable: bool = Field(..., description="True if the candidate is job-ready (Readiness is High or Medium), False if Low.")
+    salary_estimation: str = Field(..., description="Estimated salary range in 'LPA' format (e.g., '12-15 LPA').")
+    improvement_tips: List[str] = Field(..., description="3 specific, actionable tips to improve the resume for this role.")
 
 def generate_resume_data(name, summary, skills, projects, exp, edu, other, awards, job_desc):
     api_key = get_random_gemini_key()
@@ -56,15 +56,32 @@ def generate_resume_data(name, summary, skills, projects, exp, edu, other, award
     "{job_desc}"
 
     ### 🛡️ THE "NO-FLUFF" PROTOCOL:
-    1. **Quantify Everything:** Never write a sentence without a number. If the user doesn't give a number, **ESTIMATE** a realistic engineering metric.
-    2. **Strong Openers:** Architected, Orchestrated, Engineered, Deployed, Optimized, Spearheaded.
-    3. **Tech-First Tone:** Use words like "Scalability," "Latency," "Throughput," "CI/CD," "Microservices."
+    1. **Quantify Everything:** Never write a sentence without a number. If the user doesn't give a number, **ESTIMATE** a realistic engineering metric based on the tech stack (e.g., "Reduced latency by 40%", "Processed 10k+ requests", "99.9% uptime").
+    2. **Strong Openers:** Ban basic verbs like "Made", "Used", "Worked on". REPLACE with: *Architected, Orchestrated, Engineered, Deployed, Optimized, Spearheaded.*
+    3. **Tech-First Tone:** Do not sound like a student. Sound like a Senior Developer. Use words like "Scalability," "Latency," "Throughput," "CI/CD," "Microservices."
 
     ### 📝 INSTRUCTIONS BY SECTION (STRICT):
-    - SUMMARY: 3-sentence narrative.
-    - PROJECTS: Multi-faceted bullet points (Architecture, Optimization, Impact).
-    - WORK EXPERIENCE: Action -> Context -> Result.
-    - SKILLS: Grouped logically.
+
+    **1. SUMMARY (The Hook):**
+    - Create a powerful 3-sentence narrative.
+    - Sentence 1: "Results-oriented [Role] with experience in [Top Skills]."
+    - Sentence 2: "Specialized in [Specific Domain from JD]..."
+    - Sentence 3: "Proven track record of building [Key Project Type]..."
+    
+    **2. PROJECTS (The Core):**
+    - For EVERY project listed, you must generate **multi-faceted bullet points** covering:
+      * **Architecture:** What did they build and how? (e.g., "Built a RESTful API using FastAPI...")
+      * **Optimization:** How did they make it fast? (e.g., "Implemented Redis caching to reduce database load by...")
+      * **Impact:** What was the result? (e.g., "Enabled seamless PDF parsing for 500+ users.")
+    - *CRITICAL:* If the user's input is short (e.g., "Made a resume builder"), you must **EXPAND** it into a full technical breakdown.
+
+    **3. WORK EXPERIENCE:**
+    - Transform daily tasks into **Achievements**. 
+    - Format: "Action -> Context -> Result".
+    - Example: "Automated manual data entry workflows using Python scripts, saving 15 hours of engineering time per week."
+
+    **4. SKILLS:**
+    - Group them logically if possible (e.g., "Languages: Python, C++ | Frameworks: Streamlit, LangChain").
 
     ### 📥 RAW USER INPUTS:
     - Name: {profile_name}
@@ -106,13 +123,26 @@ def analyze_resume_with_ai(resume_text, job_description):
     ### CANDIDATE RESUME:
     "{resume_text}"
     
-    ### 🚨 CRITICAL DOMAIN CHECK:
-    - Score 0-10% if domains mismatch significantly.
+    ### 🚨 CRITICAL DOMAIN CHECK (Perform this FIRST):
+    1. Identify the **Primary Domain** of the JD (e.g., "Food Tech", "AI/ML", "Sales").
+    2. Identify the **Primary Domain** of the Resume.
+    3. **IF THE DOMAINS DO NOT MATCH (e.g., Food Tech vs AI/ML):**
+       - **IMMEDIATE SCORE:** 0-10%.
+       - **STOP ANALYSIS.**
+       - **Verdict:** False.
+       - **Reason:** "Critical Domain Mismatch."
 
-    ### SCORING RULES:
-    1. JD Match score.
-    2. Salary Estimation (India Market): Fresher: 3-9 LPA, Junior: 6-11 LPA, Mid: 10-18 LPA, Senior: 16-30+ LPA.
-    3. Hirable Verdict: True only if Score > 75%.
+    ### SCORING RULES (Only if Domains Match):
+    1. **JD Match:** - Core Skills Missing? Max Score = 60%.
+       - Perfect Match? Score > 85%.
+    
+    2. **Salary Estimation (India Market):**
+       - Fresher (0-1 yr): 3-9 LPA
+       - Junior (1-3 yrs): 6-11 LPA
+       - Mid (3-5 yrs): 10-18 LPA
+       - Senior (5+ yrs): 16-30+ LPA
+       
+    3. **Hirable Verdict:** True only if Score > 75% AND Experience fits.
     """
     prompt = PromptTemplate(
         template=template,
@@ -131,7 +161,15 @@ def get_chat_response(user_query, chat_history):
     )
     template = """
     You are an expert Career Coach and Tech Interviewer named 'CareerForge AI'.
-    Help with interview prep, tech concepts, and roadmap advice. Be professional and concise.
+    
+    YOUR GOALS:
+    1. Help users with interview preparation (Mock questions, STAR method tips).
+    2. Explain complex tech concepts (Python, AI, DSA) simply.
+    3. Provide roadmap advice for students.
+    4. Be encouraging, professional, and concise.
+    
+    If the user asks about something unrelated to careers/tech (like cooking or movies), 
+    politely steer them back to career topics.
     """
     prompt = ChatPromptTemplate.from_messages([
         ("system", template),

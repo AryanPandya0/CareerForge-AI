@@ -9,6 +9,7 @@ def clean_text(text):
     }
     for char, replacement in replacements.items():
         text = text.replace(char, replacement)
+    # Ensure PDF compatibility (Latin-1 encoding)
     return text.encode('latin-1', 'replace').decode('latin-1')
 
 class PDF(FPDF):
@@ -16,15 +17,21 @@ class PDF(FPDF):
         super().__init__()
         self.brand_color = brand_color
 
+    def header(self):
+        pass
+
     def add_modern_header(self, name, contact_info):
         name = clean_text(name)
         contact_info = clean_text(contact_info)
+        # Full Width Colored Box
         self.set_fill_color(*self.brand_color)
         self.rect(0, 0, 210, 35, 'F') 
+        # Name (White, Large, Bold)
         self.set_text_color(255, 255, 255)
         self.set_font('Arial', 'B', 24)
         self.set_xy(10, 12)
         self.cell(0, 10, name.upper(), 0, 1, 'C')
+        # Contact Info (White, Smaller)
         self.set_font('Arial', '', 10)
         self.set_xy(10, 28)
         self.cell(0, 5, contact_info, 0, 1, 'C')
@@ -33,12 +40,15 @@ class PDF(FPDF):
     def add_classic_header(self, name, contact_info):
         name = clean_text(name)
         contact_info = clean_text(contact_info)
+        # Name (Colored, Large)
         self.set_text_color(*self.brand_color)
         self.set_font('Arial', 'B', 22)
         self.cell(0, 10, name.upper(), 0, 1, 'C')
+        # Contact Info (Dark Grey)
         self.set_text_color(80, 80, 80)
         self.set_font('Arial', '', 10)
         self.cell(0, 5, contact_info, 0, 1, 'C')
+        # Horizontal Line
         self.set_draw_color(*self.brand_color)
         self.set_line_width(0.5)
         self.line(10, 32, 200, 32) 
@@ -53,6 +63,7 @@ class PDF(FPDF):
         self.set_draw_color(*self.brand_color)
         self.set_line_width(0.3)  
         self.line(10, curr_y, 200, curr_y) 
+        self.set_line_width(0.2)
         self.ln(2)
 
     def section_body(self, text):
@@ -67,8 +78,8 @@ class PDF(FPDF):
         self.set_text_color(40, 40, 40)
         for item in items:
             item = clean_text(item)
-            self.cell(6) 
-            self.cell(4, 5, chr(127), 0, 0) 
+            self.cell(6) # Indent
+            self.cell(4, 5, chr(127), 0, 0) # Bullet char
             self.multi_cell(0, 5, item)
         self.ln(3)
 
@@ -104,4 +115,8 @@ def generate_pdf_resume(ai_data, contact_info, template_choice, brand_color):
         pdf.section_title("Additional Details")
         pdf.section_body(ai_data['other_information'])
 
-    return pdf.output(dest='S')
+    # Output as bytes - fpdf2 returns bytes by default with no dest arg
+    pdf_output = pdf.output(dest='S')
+    if isinstance(pdf_output, str):
+        return pdf_output.encode('latin-1')
+    return bytes(pdf_output)
