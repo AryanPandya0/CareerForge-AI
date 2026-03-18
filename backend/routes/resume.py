@@ -37,8 +37,14 @@ async def generate_resume(request: ResumeRequest):
         )
         
         # Convert hex color to RGB
-        hex_color = request.theme_color.lstrip('#')
-        rgb_color = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        hex_str: str = str(request.theme_color).lstrip('#')
+        if not hex_str or len(hex_str) != 6:
+            hex_str = "1A237E" # Fallback if invalid
+            
+        r = int(hex_str[0:2], 16)
+        g = int(hex_str[2:4], 16)
+        b = int(hex_str[4:6], 16)
+        rgb_color = (r, g, b)
         
         # Prepare contact info from request
         contact_info = f"{request.email}  |  {request.phone}  |  {request.github}"

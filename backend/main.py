@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import resume, ats, chat
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
+import uvicorn
 import os
 import io
 
@@ -26,11 +27,12 @@ async def extract_pdf(file: UploadFile = File(...)):
         content = await file.read()
         pdf_file = io.BytesIO(content)
         reader = PdfReader(pdf_file)
-        text = ""
+        text_parts = []
         for page in reader.pages:
             page_text = page.extract_text()
-            if page_text:
-                text += page_text
+            if isinstance(page_text, str):
+                text_parts.append(page_text)
+        text = "".join(text_parts)
         return {"text": text}
     except Exception as e:
         return {"error": str(e)}
@@ -44,5 +46,4 @@ async def root():
     return {"message": "Welcome to CareerForge AI API"}
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
