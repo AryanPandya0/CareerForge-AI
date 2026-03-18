@@ -41,7 +41,7 @@ class ATSAnalysisSchema(BaseModel):
 def generate_resume_data(name, summary, skills, projects, exp, edu, other, awards, job_desc):
     api_key = get_random_gemini_key()
     model = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash-lite", 
+        model="gemini-2.5-flash", 
         temperature=0.6, 
         google_api_key=api_key
     )
@@ -155,7 +155,7 @@ def analyze_resume_with_ai(resume_text, job_description):
 def get_chat_response(user_query, chat_history):
     api_key = get_random_gemini_key()
     model = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash-lite", 
+        model="gemini-2.5-flash", 
         temperature=0.6, 
         google_api_key=api_key
     )

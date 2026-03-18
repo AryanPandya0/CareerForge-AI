@@ -1,16 +1,10 @@
 {
   "include": ["."],
-  "extraPaths": ["./backend"],
-  "venvPath": "D:\\CareerForge-AI",
+  "exclude": ["**/node_modules", "**/__pycache__", ".venv", "frontend"],
+  "venvPath": "d:/CareerForge-AI",
   "venv": ".venv",
   "pythonVersion": "3.13",
   "reportMissingImports": true,
   "typeCheckingMode": "basic",
-  "executionEnvironments": [
-    {
-      "root": "./backend",
-      "extraPaths": ["."],
-      "pythonVersion": "3.13"
-    }
-  ]
+  "extraPaths": ["./backend"]
 }

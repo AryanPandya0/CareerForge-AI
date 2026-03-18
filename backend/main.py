@@ -1,11 +1,16 @@
+import os
+import sys
+import io
+
+# ── CRITICAL: Set the backend directory in sys.path BEFORE any local imports ──
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from routes import resume, ats, chat
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 import uvicorn
-import os
-import io
 
 # Load .env from project root (one level up from backend/)
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))

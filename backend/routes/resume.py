@@ -41,9 +41,9 @@ async def generate_resume(request: ResumeRequest):
         if not hex_str or len(hex_str) != 6:
             hex_str = "1A237E" # Fallback if invalid
             
-        r = int(hex_str[0:2], 16)
-        g = int(hex_str[2:4], 16)
-        b = int(hex_str[4:6], 16)
+        r = int(hex_str[0] + hex_str[1], 16)
+        g = int(hex_str[2] + hex_str[3], 16)
+        b = int(hex_str[4] + hex_str[5], 16)
         rgb_color = (r, g, b)
         
         # Prepare contact info from request

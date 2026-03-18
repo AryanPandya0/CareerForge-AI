@@ -1,21 +1,29 @@
 from fpdf import FPDF
 
+
 def clean_text(text):
-    if not text: return ""
+    """Clean text for PDF compatibility (Latin-1 encoding)."""
+    if not text:
+        return ""
+    # Replace common Unicode characters
     replacements = {
-        "\u2013": "-", "\u2014": "-", "\u2018": "'", 
-        "\u2019": "'", "\u201c": '"', "\u201d": '"', 
-        "\u2022": "*"
+        "\u2013": "-", "\u2014": "-", "\u2018": "'",
+        "\u2019": "'", "\u201c": '"', "\u201d": '"',
+        "\u2022": "-", "\u2023": "-", "\u25cf": "-",
+        "\u2026": "...", "\u00a0": " ",
+        "\u2192": "->", "\u2190": "<-",
     }
     for char, replacement in replacements.items():
         text = text.replace(char, replacement)
-    # Ensure PDF compatibility (Latin-1 encoding)
+    # Remove any remaining non-Latin-1 characters
     return text.encode('latin-1', 'replace').decode('latin-1')
+
 
 class PDF(FPDF):
     def __init__(self, brand_color=(0, 0, 128)):
         super().__init__()
         self.brand_color = brand_color
+        self.set_auto_page_break(auto=True, margin=15)
 
     def header(self):
         pass
@@ -23,15 +31,12 @@ class PDF(FPDF):
     def add_modern_header(self, name, contact_info):
         name = clean_text(name)
         contact_info = clean_text(contact_info)
-        # Full Width Colored Box
         self.set_fill_color(*self.brand_color)
-        self.rect(0, 0, 210, 35, 'F') 
-        # Name (White, Large, Bold)
+        self.rect(0, 0, 210, 35, 'F')
         self.set_text_color(255, 255, 255)
         self.set_font('Arial', 'B', 24)
         self.set_xy(10, 12)
         self.cell(0, 10, name.upper(), 0, 1, 'C')
-        # Contact Info (White, Smaller)
         self.set_font('Arial', '', 10)
         self.set_xy(10, 28)
         self.cell(0, 5, contact_info, 0, 1, 'C')
@@ -40,18 +45,15 @@ class PDF(FPDF):
     def add_classic_header(self, name, contact_info):
         name = clean_text(name)
         contact_info = clean_text(contact_info)
-        # Name (Colored, Large)
         self.set_text_color(*self.brand_color)
         self.set_font('Arial', 'B', 22)
         self.cell(0, 10, name.upper(), 0, 1, 'C')
-        # Contact Info (Dark Grey)
         self.set_text_color(80, 80, 80)
         self.set_font('Arial', '', 10)
         self.cell(0, 5, contact_info, 0, 1, 'C')
-        # Horizontal Line
         self.set_draw_color(*self.brand_color)
         self.set_line_width(0.5)
-        self.line(10, 32, 200, 32) 
+        self.line(10, 32, 200, 32)
         self.ln(15)
 
     def section_title(self, title):
@@ -59,10 +61,10 @@ class PDF(FPDF):
         self.set_font('Arial', 'B', 12)
         self.set_text_color(*self.brand_color)
         self.cell(0, 8, title.upper(), 0, 1, 'L')
-        curr_y = self.get_y() - 1 
+        curr_y = self.get_y() - 1
         self.set_draw_color(*self.brand_color)
-        self.set_line_width(0.3)  
-        self.line(10, curr_y, 200, curr_y) 
+        self.set_line_width(0.3)
+        self.line(10, curr_y, 200, curr_y)
         self.set_line_width(0.2)
         self.ln(2)
 
@@ -78,15 +80,19 @@ class PDF(FPDF):
         self.set_text_color(40, 40, 40)
         for item in items:
             item = clean_text(item)
-            self.cell(6) # Indent
-            self.cell(4, 5, chr(127), 0, 0) # Bullet char
-            self.multi_cell(0, 5, item)
+            if not item.strip():
+                continue
+            # Save current x position and use simple approach
+            self.set_x(self.l_margin)
+            bullet_text = "  -  " + item
+            self.multi_cell(0, 5, bullet_text)
         self.ln(3)
+
 
 def generate_pdf_resume(ai_data, contact_info, template_choice, brand_color):
     pdf = PDF(brand_color=brand_color)
     pdf.add_page()
-    
+
     if template_choice == "Modern (Bold Header)":
         pdf.add_modern_header(ai_data['profile_name'], contact_info)
     else:
@@ -110,25 +116,15 @@ def generate_pdf_resume(ai_data, contact_info, template_choice, brand_color):
     if ai_data.get('achievements'):
         pdf.section_title("Honors & Awards")
         pdf.bullet_points(ai_data['achievements'])
-    
+
     if ai_data.get('other_information'):
         pdf.section_title("Additional Details")
         pdf.section_body(ai_data['other_information'])
 
-    # Legacy fpdf will silently write to stdout and return '' if no args are passed.
-    # Therefore, we MUST try dest='S' first to force it to return the string buffer.
-    try:
-        pdf_data = pdf.output(dest='S')
-        if isinstance(pdf_data, bytearray):
-            return bytes(pdf_data)
-        if isinstance(pdf_data, str):
-            return pdf_data.encode('latin-1')
-        return bytes(pdf_data)
-    except Exception:
-        # Modern fpdf2 throws an error on dest='S', so we fall back to default output()
-        pdf_bytes = pdf.output()
-        if isinstance(pdf_bytes, bytearray):
-            return bytes(pdf_bytes)
-        if isinstance(pdf_bytes, str):
-            return pdf_bytes.encode('latin-1')
+    # fpdf2: output() returns bytes directly
+    pdf_bytes = pdf.output()
+    if isinstance(pdf_bytes, bytearray):
         return bytes(pdf_bytes)
+    if isinstance(pdf_bytes, str):
+        return pdf_bytes.encode('latin-1')
+    return bytes(pdf_bytes)
