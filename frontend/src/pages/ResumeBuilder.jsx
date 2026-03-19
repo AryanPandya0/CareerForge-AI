@@ -3,14 +3,14 @@ import axios from 'axios';
 import { Download, Loader2 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://careerforge-ypaf.onrender.com';
 
 const ResumeBuilder = () => {
   const [formData, setFormData] = useState(() => {
     const saved = sessionStorage.getItem('resumeBuilderFormData');
     if (saved && saved !== 'undefined' && saved !== 'null') {
-      try { 
-        const parsed = JSON.parse(saved); 
+      try {
+        const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
           return parsed;
         }
