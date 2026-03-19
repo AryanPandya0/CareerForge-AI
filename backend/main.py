@@ -20,11 +20,12 @@ app = FastAPI(title="CareerForge AI API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://careerforge-kohl.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.post("/extract-pdf")
 async def extract_pdf(file: UploadFile = File(...)):
